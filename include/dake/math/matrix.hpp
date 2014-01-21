@@ -179,7 +179,7 @@ template<int R, int C, typename T> class mat
                     float val = 0.f;
 
                     for (int k = 0; k < C; k++)
-                        val += d[k * R + j] * om.d[i * R + k];
+                        val += d[k * R + j] * om.d[i * C + k];
 
                     ret.d[i * R + j] = val;
                 }
