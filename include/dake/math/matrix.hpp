@@ -51,10 +51,10 @@ typedef mat<4, 4, int> mat4i;
 
 template<int R, int C, typename T> class mat
 {
-    private:
+    public:
         T d[R * C];
 
-    public:
+
         template<class...Tv, typename std::enable_if<sizeof...(Tv) == C, int>::type = 0>
         mat(Tv... cols)
         {
