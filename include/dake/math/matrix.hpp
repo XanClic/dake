@@ -90,6 +90,14 @@ template<int R, int C, typename T> class mat
         {}
 
 
+        static mat<R, C, T> zero(void)
+        {
+            mat<R, C, T> z;
+            memset(z.d, 0.f, sizeof(z.d));
+            return z;
+        }
+
+
         T &x(void)
         { static_assert(R >= 1 && C == 1, "x() is defined for vectors only"); return d[0]; }
 
