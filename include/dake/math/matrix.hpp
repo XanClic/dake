@@ -97,6 +97,14 @@ template<int R, int C, typename T> class mat
             return z;
         }
 
+        static mat<R, C, T> identity(void)
+        {
+            static_assert(R == C, "identity() is defined for square matrices only");
+            mat<R, C, T> i;
+            i.make_identity();
+            return i;
+        }
+
 
         T &x(void)
         { static_assert(R >= 1 && C == 1, "x() is defined for vectors only"); return d[0]; }
@@ -241,9 +249,9 @@ template<int R, int C, typename T> class mat
         mat<C, R, T> scaled(const vec<3, T> &fac) const;
 
 
-        void identity(void)
+        void make_identity(void)
         {
-            static_assert(R == C, "identity() is defined for square matrices only");
+            static_assert(R == C, "make_identity() is defined for square matrices only");
 
             memset(d, 0, sizeof(d));
             for (int i = 0; i < R; i++)
