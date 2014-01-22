@@ -15,7 +15,7 @@ namespace container
 
 // General implementation
 template<class InputIterator, typename T = typename std::iterator_traits<InputIterator>::value_type, class Function>
-T inject(InputIterator first, InputIterator last, const T &initial, Function fn)
+static inline T inject(InputIterator first, InputIterator last, const T &initial, Function fn)
 {
     T value(initial);
 
@@ -27,7 +27,7 @@ T inject(InputIterator first, InputIterator last, const T &initial, Function fn)
 
 // This automatically resolves template functions given as function parameter
 template<class InputIterator, typename T = typename std::iterator_traits<InputIterator>::value_type>
-T inject(InputIterator first, InputIterator last, const T &initial, T (*fn)(const T &, const T &))
+static inline T inject(InputIterator first, InputIterator last, const T &initial, T (*fn)(const T &, const T &))
 {
     T value(initial);
 
