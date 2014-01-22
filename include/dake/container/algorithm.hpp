@@ -38,18 +38,12 @@ static inline T inject(InputIterator first, InputIterator last, const T &initial
 }
 
 // General implementation for whole containers as input
-template<class InputContainer, class Function>
-auto inject(const InputContainer &input, const _cvt(input) &initial, Function fn) -> _cvt(input)
-{
-    return inject(input.begin(), input.end(), initial, fn);
-}
+template<class InputContainer, class Function> static inline auto inject(const InputContainer &input, const _cvt(input) &initial, Function fn) -> _cvt(input)
+{ return inject(input.begin(), input.end(), initial, fn); }
 
 // Template resolver for whole containers
-template<class InputContainer>
-auto inject(const InputContainer &input, const _cvt(input) &initial, _cvt(input) (*fn)(const _cvt(input) &, const _cvt(input) &)) -> _cvt(input)
-{
-    return inject(input.begin(), input.end(), initial, fn);
-}
+template<class InputContainer> static inline auto inject(const InputContainer &input, const _cvt(input) &initial, _cvt(input) (*fn)(const _cvt(input) &, const _cvt(input) &)) -> _cvt(input)
+{ return inject(input.begin(), input.end(), initial, fn); }
 
 
 #undef _cvt
