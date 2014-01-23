@@ -25,14 +25,14 @@ int main(void)
     q.push_back(vec2(20.f,  2.f));
 
 
-    auto p_centroid = inject(p, vec2::zero(), helper::sum) / p.size();
-    auto q_centroid = inject(q, vec2::zero(), helper::sum) / q.size();
+    auto p_centroid = inject(p, helper::sum) / p.size();
+    auto q_centroid = inject(q, helper::sum) / q.size();
 
 
     auto p_rel = map(p, [&](const vec2 &pi) { return pi - p_centroid; });
     auto q_rel = map(q, [&](const vec2 &qi) { return qi - q_centroid; });
 
-    auto H = inject(map<mat2>(range<>(0, p.size() - 1), [&](int i) { return q_rel[i] * p_rel[i].transposed(); }), mat2::zero(), helper::sum) / p.size();
+    auto H = inject(map<mat2>(range<>(0, p.size() - 1), [&](int i) { return q_rel[i] * p_rel[i].transposed(); }), helper::sum) / p.size();
 
     printf("H:\n");
     printf("%10g %10g\n", H[0][0], H[1][0]);
