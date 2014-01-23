@@ -21,7 +21,7 @@ namespace container
 
 template<typename T, typename V> static inline void _stuff(T &container, const V &value, typename std::enable_if<helper::has_push_back<T>::value>::type * = 0)
 { container.push_back(value); }
-template<typename T, typename V> static inline void _stuff(T &container, const V &value, typename std::enable_if<helper::has_push<T>::value>::type * = 0)
+template<typename T, typename V> static inline void _stuff(T &container, const V &value, typename std::enable_if<helper::has_push<T>::value && !helper::has_push_back<T>::value>::type * = 0)
 { container.push(value); }
 
 
