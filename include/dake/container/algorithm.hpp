@@ -33,7 +33,10 @@ static inline Result inject(InputIterator first, InputIterator last, const Resul
     Result value(initial);
 
     while (first != last)
-        value = fn(value, *(first++));
+    {
+        value = fn(value, *first);
+        ++first;
+    }
 
     return value;
 }
@@ -45,7 +48,10 @@ static inline Result inject(InputIterator first, InputIterator last, const Resul
     Result value(initial);
 
     while (first != last)
-        value = fn(value, *(first++));
+    {
+        value = fn(value, *first);
+        ++first;
+    }
 
     return value;
 }
@@ -67,8 +73,8 @@ static inline T inject(InputIterator first, InputIterator last, Function fn)
     if (first == last)
         throw std::runtime_error("inject() called on an empty range without an initial value");
 
-    T initial(*(first++));
-    return inject(first, last, initial, fn);
+    T initial(*first);
+    return inject(++first, last, initial, fn);
 }
 
 template<class InputIterator, typename T = _ivt(InputIterator)>
@@ -77,8 +83,8 @@ static inline T inject(InputIterator first, InputIterator last, T (*fn)(const T 
     if (first == last)
         throw std::runtime_error("inject() called on an empty range without an initial value");
 
-    T initial(*(first++));
-    return inject(first, last, initial, fn);
+    T initial(*first);
+    return inject(++first, last, initial, fn);
 }
 
 template<class InputContainer, class Function, typename T = _cvt(InputContainer)>
@@ -97,7 +103,10 @@ static inline typename std::enable_if<helper::is_pushable<OutputContainer>::valu
     OutputContainer out;
 
     while (first != last)
-        _stuff(out, fn(*(first++)));
+    {
+        _stuff(out, fn(*first));
+        ++first;
+    }
 
     return out;
 }
@@ -114,7 +123,10 @@ static inline typename std::enable_if<helper::is_pushable<OutputContainer>::valu
     OutputContainer out;
 
     while (first != last)
-        _stuff(out, fn(*(first++)));
+    {
+        _stuff(out, fn(*first));
+        ++first;
+    }
 
     return out;
 }
