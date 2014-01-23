@@ -14,15 +14,17 @@ using namespace dake::math;
 
 int main(void)
 {
-    std::vector<vec2> p, q;
-
-    p.push_back(vec2(4.f, 14.f));
-    p.push_back(vec2(1.f,  4.f));
-    p.push_back(vec2(4.f,  1.f));
-
-    q.push_back(vec2(12.f, 12.f));
-    q.push_back(vec2(16.f,  2.f));
-    q.push_back(vec2(20.f,  2.f));
+    std::vector<vec2>
+    p{
+        { 4.f, 14.f },
+        { 1.f,  4.f },
+        { 4.f,  1.f }
+    },
+    q{
+        { 12.f, 12.f },
+        { 16.f,  2.f },
+        { 20.f,  2.f }
+    };
 
 
     auto p_centroid = inject(p, helper::sum) / p.size();
