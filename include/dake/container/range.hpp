@@ -39,16 +39,16 @@ class range_iterator
         { return ri.pos != pos; }
 
         range_iterator &operator++(void)
-        { pos++; return *this; }
+        { ++pos; return *this; }
 
         range_iterator operator++(int _)
-        { (void)_; return range_iterator<T>(pos++); }
+        { (void)_; range_iterator<T> ri(pos); ++pos; return ri; }
 
         range_iterator &operator--(void)
-        { pos--; return *this; }
+        { --pos; return *this; }
 
         range_iterator operator--(int _)
-        { (void)_; return range_iterator<T>(pos--); }
+        { (void)_; range_iterator<T> ri(pos); --pos; return ri; }
 
 
     friend class range<T>;
@@ -64,7 +64,7 @@ class range
     public:
         range(const T &start, const T &end):
             s(start), e(end)
-        { e++; }
+        { ++e; }
 
         range_iterator<T> begin(void) const
         { return range_iterator<T>(s); }
