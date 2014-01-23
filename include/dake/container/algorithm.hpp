@@ -2,6 +2,7 @@
 #define DAKE__CONTAINER__ALGORITHM_HPP
 
 #include <iterator>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -58,6 +59,35 @@ static inline Result inject(const InputContainer &input, const Result &initial, 
 template<class InputContainer, typename Result, typename Input = _cvt(InputContainer)>
 static inline Result inject(const InputContainer &input, const Result &initial, Result (*fn)(const Result &, const Input &))
 { return inject(input.begin(), input.end(), initial, fn); }
+
+// If Result === Input, we may omit the initial value.
+template<class InputIterator, class Function, typename T = _ivt(InputIterator)>
+static inline T inject(InputIterator first, InputIterator last, Function fn)
+{
+    if (first == last)
+        throw std::runtime_error("inject() called on an empty range without an initial value");
+
+    T initial(*(first++));
+    return inject(first, last, initial, fn);
+}
+
+template<class InputIterator, typename T = _ivt(InputIterator)>
+static inline T inject(InputIterator first, InputIterator last, T (*fn)(const T &, const T &))
+{
+    if (first == last)
+        throw std::runtime_error("inject() called on an empty range without an initial value");
+
+    T initial(*(first++));
+    return inject(first, last, initial, fn);
+}
+
+template<class InputContainer, class Function, typename T = _cvt(InputContainer)>
+static inline T inject(const InputContainer &input, Function fn)
+{ return inject(input.begin(), input.end(), fn); }
+
+template<class InputContainer, typename T = _cvt(InputContainer)>
+static inline T inject(const InputContainer &input, T (*fn)(const T &, const T &))
+{ return inject(input.begin(), input.end(), fn); }
 
 
 // General implementation
