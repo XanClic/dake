@@ -173,6 +173,132 @@ template<class InputContainer, typename Output = _cvt(InputContainer), typename 
 std::vector<Output> map(const InputContainer &input, Output (*fn)(const Input &))
 { return map<std::vector<Output>>(input.begin(), input.end(), fn); }
 
+
+// General implementation
+template<class OutputContainer, class InputIterator, class Function, typename T = _ivt(InputIterator)>
+OutputContainer select(InputIterator first, InputIterator last, Function fn)
+{
+    OutputContainer out;
+
+    while (first != last)
+    {
+        if (fn(*first))
+            _stuff(out, *first);
+        ++first;
+    }
+
+    return out;
+}
+
+// Default for OutputContainer is std::vector
+template<class InputIterator, class Function, typename T = _ivt(InputIterator)>
+std::vector<T> select(InputIterator first, InputIterator last, Function fn)
+{ return select<std::vector<T>>(first, last, fn); }
+
+// user-defined + template resolver
+template<class OutputContainer, class InputIterator, typename T = _ivt(InputIterator)>
+OutputContainer select(InputIterator first, InputIterator last, bool (*fn)(const T &))
+{
+    OutputContainer out;
+
+    while (first != last)
+    {
+        if (fn(*first))
+            _stuff(out, *first);
+        ++first;
+    }
+
+    return out;
+}
+
+// std::vector + template resolver
+template<class InputIterator, typename T = _ivt(InputIterator)>
+std::vector<T> select(InputIterator first, InputIterator last, bool (*fn)(const T &))
+{ return select<std::vector<T>>(first, last, fn); }
+
+// user-defined + general function + whole container
+template<class OutputContainer, class InputContainer, class Function, typename T = _cvt(InputContainer)>
+OutputContainer select(const InputContainer &input, Function fn)
+{ return select<OutputContainer>(input.begin(), input.end(), fn); }
+
+// std::vector + general function + whole container
+template<class InputContainer, class Function, typename T = _cvt(InputContainer)>
+std::vector<T> select(const InputContainer &input, Function fn)
+{ return select<std::vector<T>>(input.begin(), input.end(), fn); }
+
+// user-defined + template resolver + whole container
+template<class OutputContainer, class InputContainer, typename T = _cvt(InputContainer)>
+OutputContainer select(const InputContainer &input, bool (*fn)(const T &))
+{ return select<OutputContainer>(input.begin(), input.end(), fn); }
+
+// std::vector + template resolver + whole container
+template<class InputContainer, typename T = _cvt(InputContainer)>
+std::vector<T> select(const InputContainer &input, bool (*fn)(const T &))
+{ return select<std::vector<T>>(input.begin(), input.end(), fn); }
+
+
+// General implementation
+template<class OutputContainer, class InputIterator, class Function, typename T = _ivt(InputIterator)>
+OutputContainer reject(InputIterator first, InputIterator last, Function fn)
+{
+    OutputContainer out;
+
+    while (first != last)
+    {
+        if (!fn(*first))
+            _stuff(out, *first);
+        ++first;
+    }
+
+    return out;
+}
+
+// Default for OutputContainer is std::vector
+template<class InputIterator, class Function, typename T = _ivt(InputIterator)>
+std::vector<T> reject(InputIterator first, InputIterator last, Function fn)
+{ return reject<std::vector<T>>(first, last, fn); }
+
+// user-defined + template resolver
+template<class OutputContainer, class InputIterator, typename T = _ivt(InputIterator)>
+OutputContainer reject(InputIterator first, InputIterator last, bool (*fn)(const T &))
+{
+    OutputContainer out;
+
+    while (first != last)
+    {
+        if (!fn(*first))
+            _stuff(out, *first);
+        ++first;
+    }
+
+    return out;
+}
+
+// std::vector + template resolver
+template<class InputIterator, typename T = _ivt(InputIterator)>
+std::vector<T> reject(InputIterator first, InputIterator last, bool (*fn)(const T &))
+{ return reject<std::vector<T>>(first, last, fn); }
+
+// user-defined + general function + whole container
+template<class OutputContainer, class InputContainer, class Function, typename T = _cvt(InputContainer)>
+OutputContainer reject(const InputContainer &input, Function fn)
+{ return reject<OutputContainer>(input.begin(), input.end(), fn); }
+
+// std::vector + general function + whole container
+template<class InputContainer, class Function, typename T = _cvt(InputContainer)>
+std::vector<T> reject(const InputContainer &input, Function fn)
+{ return reject<std::vector<T>>(input.begin(), input.end(), fn); }
+
+// user-defined + template resolver + whole container
+template<class OutputContainer, class InputContainer, typename T = _cvt(InputContainer)>
+OutputContainer reject(const InputContainer &input, bool (*fn)(const T &))
+{ return reject<OutputContainer>(input.begin(), input.end(), fn); }
+
+// std::vector + template resolver + whole container
+template<class InputContainer, typename T = _cvt(InputContainer)>
+std::vector<T> reject(const InputContainer &input, bool (*fn)(const T &))
+{ return reject<std::vector<T>>(input.begin(), input.end(), fn); }
+
 }
 }
 
