@@ -28,7 +28,7 @@ template<typename T, typename V> static inline void _stuff(T &container, const V
 
 // General implementation
 template<class InputIterator, typename Result, class Function>
-static inline Result inject(InputIterator first, InputIterator last, const Result &initial, Function fn)
+Result inject(InputIterator first, InputIterator last, const Result &initial, Function fn)
 {
     Result value(initial);
 
@@ -43,7 +43,7 @@ static inline Result inject(InputIterator first, InputIterator last, const Resul
 
 // This automatically resolves template functions given as function parameter
 template<class InputIterator, typename Result, typename Input = _ivt(InputIterator)>
-static inline Result inject(InputIterator first, InputIterator last, const Result &initial, Result (*fn)(const Result &, const Input &))
+Result inject(InputIterator first, InputIterator last, const Result &initial, Result (*fn)(const Result &, const Input &))
 {
     Result value(initial);
 
@@ -58,17 +58,17 @@ static inline Result inject(InputIterator first, InputIterator last, const Resul
 
 // General implementation for whole containers as input
 template<class InputContainer, class Function, typename Result>
-static inline Result inject(const InputContainer &input, const Result &initial, Function fn)
+Result inject(const InputContainer &input, const Result &initial, Function fn)
 { return inject(input.begin(), input.end(), initial, fn); }
 
 // Template resolver for whole containers
 template<class InputContainer, typename Result, typename Input = _cvt(InputContainer)>
-static inline Result inject(const InputContainer &input, const Result &initial, Result (*fn)(const Result &, const Input &))
+Result inject(const InputContainer &input, const Result &initial, Result (*fn)(const Result &, const Input &))
 { return inject(input.begin(), input.end(), initial, fn); }
 
 // If Result === Input, we may omit the initial value.
 template<class InputIterator, class Function, typename T = _ivt(InputIterator)>
-static inline T inject(InputIterator first, InputIterator last, Function fn)
+T inject(InputIterator first, InputIterator last, Function fn)
 {
     if (first == last)
         throw std::runtime_error("inject() called on an empty range without an initial value");
@@ -78,7 +78,7 @@ static inline T inject(InputIterator first, InputIterator last, Function fn)
 }
 
 template<class InputIterator, typename T = _ivt(InputIterator)>
-static inline T inject(InputIterator first, InputIterator last, T (*fn)(const T &, const T &))
+T inject(InputIterator first, InputIterator last, T (*fn)(const T &, const T &))
 {
     if (first == last)
         throw std::runtime_error("inject() called on an empty range without an initial value");
@@ -88,17 +88,17 @@ static inline T inject(InputIterator first, InputIterator last, T (*fn)(const T 
 }
 
 template<class InputContainer, class Function, typename T = _cvt(InputContainer)>
-static inline T inject(const InputContainer &input, Function fn)
+T inject(const InputContainer &input, Function fn)
 { return inject(input.begin(), input.end(), fn); }
 
 template<class InputContainer, typename T = _cvt(InputContainer)>
-static inline T inject(const InputContainer &input, T (*fn)(const T &, const T &))
+T inject(const InputContainer &input, T (*fn)(const T &, const T &))
 { return inject(input.begin(), input.end(), fn); }
 
 
 // General implementation
 template<class OutputContainer, class InputIterator, class Function>
-static inline typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(InputIterator first, InputIterator last, Function fn)
+typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(InputIterator first, InputIterator last, Function fn)
 {
     OutputContainer out;
 
@@ -113,12 +113,12 @@ static inline typename std::enable_if<helper::is_pushable<OutputContainer>::valu
 
 // Default for OutputContainer is std::vector; in this case, however, the OutputType has to be given
 template<typename Output, class InputIterator, class Function>
-static inline typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(InputIterator first, InputIterator last, Function fn)
+typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(InputIterator first, InputIterator last, Function fn)
 { return map<std::vector<Output>>(first, last, fn); }
 
 // User-defined output + template resolver
 template<class OutputContainer, class InputIterator, typename Output = _cvt(OutputContainer), typename Input = _ivt(InputIterator)>
-static inline typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(InputIterator first, InputIterator last, Output (*fn)(const Input &))
+typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(InputIterator first, InputIterator last, Output (*fn)(const Input &))
 {
     OutputContainer out;
 
@@ -133,44 +133,44 @@ static inline typename std::enable_if<helper::is_pushable<OutputContainer>::valu
 
 // std::vector + template resolver
 template<typename Output, class InputIterator, typename Input = _ivt(InputIterator)>
-static inline typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(InputIterator first, InputIterator last, Output (*fn)(const Input &))
+typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(InputIterator first, InputIterator last, Output (*fn)(const Input &))
 { return map<std::vector<Output>>(first, last, fn); }
 
 // user-defined + general function + whole container
 template<class OutputContainer, class InputContainer, class Function>
-static inline typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(const InputContainer &input, Function fn)
+typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(const InputContainer &input, Function fn)
 { return map<OutputContainer>(input.begin(), input.end(), fn); }
 
 // std::vector + general function + whole container
 template<typename Output, class InputContainer, class Function>
-static inline typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(const InputContainer &input, Function fn)
+typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(const InputContainer &input, Function fn)
 { return map<std::vector<Output>>(input.begin(), input.end(), fn); }
 
 // user-defined + template resolver + whole container
 template<class OutputContainer, class InputContainer, typename Output = _cvt(OutputContainer), typename Input = _cvt(InputContainer)>
-static inline typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(const InputContainer &input, Output (*fn)(const Input &))
+typename std::enable_if<helper::is_pushable<OutputContainer>::value, OutputContainer>::type map(const InputContainer &input, Output (*fn)(const Input &))
 { return map<OutputContainer>(input.begin(), input.end(), fn); }
 
 // std::vector + template resolver + whole container
 template<typename Output, class InputContainer, typename Input = _cvt(InputContainer)>
-static inline typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(const InputContainer &input, Output (*fn)(const Input &))
+typename std::enable_if<!helper::is_pushable<Output>::value, std::vector<Output>>::type map(const InputContainer &input, Output (*fn)(const Input &))
 { return map<std::vector<Output>>(input.begin(), input.end(), fn); }
 
 // And now try to deduce the output type through the InputIterator's value type (if no output container type is given)
 template<class InputIterator, class Function, typename Output = _ivt(InputIterator)>
-static inline std::vector<Output> map(InputIterator first, InputIterator last, Function fn)
+std::vector<Output> map(InputIterator first, InputIterator last, Function fn)
 { return map<std::vector<Output>>(first, last, fn); }
 
 template<class InputIterator, typename Output = _ivt(InputIterator), typename Input = _ivt(InputIterator)>
-static inline std::vector<Output> map(InputIterator first, InputIterator last, Output (*fn)(const Input &))
+std::vector<Output> map(InputIterator first, InputIterator last, Output (*fn)(const Input &))
 { return map<std::vector<Output>>(first, last, fn); }
 
 template<class InputContainer, class Function, typename Output = _cvt(InputContainer)>
-static inline std::vector<Output> map(const InputContainer &input, Function fn)
+std::vector<Output> map(const InputContainer &input, Function fn)
 { return map<std::vector<Output>>(input.begin(), input.end(), fn); }
 
 template<class InputContainer, typename Output = _cvt(InputContainer), typename Input = _cvt(InputContainer)>
-static inline std::vector<Output> map(const InputContainer &input, Output (*fn)(const Input &))
+std::vector<Output> map(const InputContainer &input, Output (*fn)(const Input &))
 { return map<std::vector<Output>>(input.begin(), input.end(), fn); }
 
 }

@@ -7,49 +7,49 @@ namespace helper
 {
 
 template<typename T>
-static inline T sum(const T &x, const T &y)
+T sum(const T &x, const T &y)
 {
     return x + y;
 }
 
 
 template<typename T>
-static inline T difference(const T &x, const T &y)
+T difference(const T &x, const T &y)
 {
     return x - y;
 }
 
 
 template<typename T>
-static inline T product(const T &x, const T &y)
+T product(const T &x, const T &y)
 {
     return x * y;
 }
 
 
 template<typename T>
-static inline T quotient(const T &x, const T &y)
+T quotient(const T &x, const T &y)
 {
     return x / y;
 }
 
 
 template<typename T>
-static inline T conjunction(const T &x, const T &y)
+T conjunction(const T &x, const T &y)
 {
     return x & y;
 }
 
 
 template<typename T>
-static inline T disjunction(const T &x, const T &y)
+T disjunction(const T &x, const T &y)
 {
     return x | y;
 }
 
 
 template<typename T>
-static inline T exclusive_disjunction(const T &x, const T &y)
+T exclusive_disjunction(const T &x, const T &y)
 {
     return x ^ y;
 }
