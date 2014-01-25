@@ -299,6 +299,10 @@ template<class InputContainer, typename T = _cvt(InputContainer)>
 std::vector<T> reject(const InputContainer &input, bool (*fn)(const T &))
 { return reject<std::vector<T>>(input.begin(), input.end(), fn); }
 
+
+#undef _cvt
+#undef _ivt
+
 }
 }
 
