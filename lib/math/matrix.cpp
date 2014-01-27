@@ -387,6 +387,12 @@ template<> mat4 mat4::scaled(const vec3 &fac) const
 }
 
 
+template<> float mat2::det(void)
+{
+    return d[0] * d[3] - d[1] * d[2];
+}
+
+
 template<> float mat3::det(void)
 {
     return d[0] * (d[4] * d[8] - d[5] * d[7]) -
