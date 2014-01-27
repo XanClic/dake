@@ -2,7 +2,7 @@ CXX ?= g++
 CXXFLAGS = -O3 -Wall -Wextra -std=c++11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY
 AR = ar rcs
 
-OBJECTS = $(patsubst %.cpp,%.o,$(shell find -name '*.cpp' -and -not -path './examples/*' -print0))
+OBJECTS = $(patsubst %.cpp,%.o,$(shell find -name '*.cpp' -and -not -path './examples/*'))
 EXAMPLES = $(patsubst %.cpp,%,$(wildcard examples/*.cpp))
 
 LIB = libdake.a
@@ -19,7 +19,7 @@ $(LIB): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 examples/%: examples/%.cpp $(LIB)
-	$(CXX) $(CXXFLAGS) $< -o $@ $(LIB)
+	$(CXX) $(CXXFLAGS) $< -o $@ $(LIB) -lm
 
 clean:
 	$(RM) $(OBJECTS) $(LIB)

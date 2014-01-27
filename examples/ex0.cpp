@@ -37,8 +37,60 @@ int main(void)
     auto H = inject(map<mat2>(range<>(0, p.size() - 1), [&](int i) { return q_rel[i] * p_rel[i].transposed(); }), helper::sum) / p.size();
 
     printf("H:\n");
-    printf("%10g %10g\n", H[0][0], H[1][0]);
-    printf("%10g %10g\n", H[0][1], H[1][1]);
+    printf("( %10g %10g )\n", H[0][0], H[1][0]);
+    printf("( %10g %10g )\n", H[0][1], H[1][1]);
+
+    printf("---\n");
+
+
+    auto U = H.svd_U();
+    auto V = H.svd_V().transposed();
+
+    // matX::diagonal(1.f, ..., (V * U).det())
+    auto diag = decltype(U)::identity();
+    diag[diag.cols() - 1][diag.rows() - 1] = (V * U).det();
+
+    auto R = V * diag * U;
+
+    if (R.det() < 0.f)
+    {
+        diag[diag.cols() - 1][diag.rows() - 1] *= -1.f;
+        R = V * diag * U;
+    }
+
+
+    auto t = p_centroid - R * q_centroid;
+
+
+    printf("R:\n");
+    printf("( %10g %10g )\n", R[0][0], R[1][0]);
+    printf("( %10g %10g )\n", R[0][1], R[1][1]);
+
+    printf("t:\n");
+    printf("( %10g )\n", t[0]);
+    printf("( %10g )\n", t[1]);
+
+    printf("---\n");
+
+
+    printf("p:\n");
+    for (auto pi: p)
+        printf("( %10g )  ", pi[0]);
+    putchar('\n');
+    for (auto pi: p)
+        printf("( %10g ), ", pi[1]);
+    putchar('\n');
+
+    auto q_trans = map(q, [&](const vec2 &qi) { return R * qi + t; });
+
+    printf("q:\n");
+    for (auto qi: q_trans)
+        printf("( %10g )  ", qi[0]);
+    putchar('\n');
+    for (auto qi: q_trans)
+        printf("( %10g ), ", qi[1]);
+    putchar('\n');
+
 
     return 0;
 }
