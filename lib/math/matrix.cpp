@@ -152,7 +152,7 @@ static void mult_mat2(float *d, const float *s1, const float *s2)
 }
 
 
-template<> template<> mat4 &mat4::operator*=(const mat4 &m)
+template<> mat4 &mat4::operator*=(const mat4 &m)
 {
     mult_mat4(d, d, m);
     return *this;
@@ -167,7 +167,7 @@ template<> template<> mat4 mat4::operator*(const mat4 &om) const
 }
 
 
-template<> template<> mat3 &mat3::operator*=(const mat3 &m)
+template<> mat3 &mat3::operator*=(const mat3 &m)
 {
     mult_mat3(d, d, m);
     return *this;
@@ -182,7 +182,7 @@ template<> template<> mat3 mat3::operator*(const mat3 &om) const
 }
 
 
-template<> template<> mat2 &mat2::operator*=(const mat2 &m)
+template<> mat2 &mat2::operator*=(const mat2 &m)
 {
     mult_mat2(d, d, m);
     return *this;
