@@ -215,11 +215,11 @@ template<int R, int C, typename T> class mat
             return ret;
         }
 
+        mat<R, C, T> &operator*=(const mat<R, C, T> &om);
+
         template<typename U>
         mat<R, C, T> &operator*=(const U &scale)
         { for (int i = 0; i < R * C; i++) d[i] *= scale; return *this; }
-
-        mat<R, C, T> &operator*=(const mat<R, C, T> &om);
 
 
         template<typename U>
@@ -327,9 +327,9 @@ template<> template<> mat2 mat2::operator*(const mat2 &om) const;
 template<> template<> mat3 mat3::operator*(const mat3 &om) const;
 template<> template<> mat4 mat4::operator*(const mat4 &om) const;
 
-template<> template<> mat2 &mat2::operator*=(const mat2 &om);
-template<> template<> mat3 &mat3::operator*=(const mat3 &om);
-template<> template<> mat4 &mat4::operator*=(const mat4 &om);
+template<> mat2 &mat2::operator*=(const mat2 &om);
+template<> mat3 &mat3::operator*=(const mat3 &om);
+template<> mat4 &mat4::operator*=(const mat4 &om);
 
 template<> template<> vec2 mat2::operator*(const vec2 &v) const;
 template<> template<> vec3 mat3::operator*(const vec3 &v) const;
