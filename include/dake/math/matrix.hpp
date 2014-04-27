@@ -361,7 +361,7 @@ template<int R, int C, typename T> class mat
 
 
         template<typename U>
-        auto cross(const vec<3, U> &ov) const -> decltype(d[0] * ov.d[0])
+        vec<3, U> cross(const vec<3, U> &ov) const
         {
             static_assert(R == 3 && C == 1, "cross() is defined for 3-element vectors only");
 
@@ -467,6 +467,10 @@ template<> mat4 &mat4::operator*=(const mat4 &om);
 template<> template<> vec2 mat2::operator*(const vec2 &v) const;
 template<> template<> vec3 mat3::operator*(const vec3 &v) const;
 template<> template<> vec4 mat4::operator*(const vec4 &v) const;
+
+
+template<int R, int C, typename T> static mat<R, C, T> operator*(T lhs, const mat<R, C, T> &rhs)
+{ return rhs * lhs; }
 
 
 template<int R, int C, typename T>
