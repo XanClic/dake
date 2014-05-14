@@ -173,6 +173,10 @@ namespace dake
 namespace gl
 {
 
+template<> void uniform<math::mat2>::assign(const math::mat2 &value)
+{ glUniformMatrix2fv(id, 1, false, value); }
+template<> void uniform<math::mat3>::assign(const math::mat3 &value)
+{ glUniformMatrix3fv(id, 1, false, value); }
 template<> void uniform<math::mat4>::assign(const math::mat4 &value)
 { glUniformMatrix4fv(id, 1, false, value); }
 template<> void uniform<math::vec2>::assign(const math::vec2 &value)
