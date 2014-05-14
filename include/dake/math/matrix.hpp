@@ -391,7 +391,7 @@ template<int R, int C, typename T> class mat
             return ret;
         }
 
-        _double_default(T) length(void)
+        _double_default(T) length(void) const
         {
             static_assert(C == 1, "length() is defined for vectors only");
 
