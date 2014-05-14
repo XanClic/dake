@@ -20,15 +20,15 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
 {
 #ifdef X64_ASSEMBLY
     __asm__ __volatile__ (
-            "movaps  0(%1),%%xmm0;"
-            "movaps 16(%1),%%xmm1;"
-            "movaps 32(%1),%%xmm2;"
-            "movaps 48(%1),%%xmm3;"
+            "movups  0(%1),%%xmm0;"
+            "movups 16(%1),%%xmm1;"
+            "movups 32(%1),%%xmm2;"
+            "movups 48(%1),%%xmm3;"
 
-            "movaps  0(%2),%%xmm4;"
-            "movaps 16(%2),%%xmm5;"
-            "movaps 32(%2),%%xmm6;"
-            "movaps 48(%2),%%xmm7;"
+            "movups  0(%2),%%xmm4;"
+            "movups 16(%2),%%xmm5;"
+            "movups 32(%2),%%xmm6;"
+            "movups 48(%2),%%xmm7;"
 
             "pshufd $0x00,%%xmm4,%%xmm8;"
             "pshufd $0x55,%%xmm4,%%xmm9;"
@@ -41,7 +41,7 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
             "addps  %%xmm9,%%xmm8;"
             "addps  %%xmm11,%%xmm10;"
             "addps  %%xmm10,%%xmm8;"
-            "movaps %%xmm8, 0(%0);"
+            "movups %%xmm8, 0(%0);"
 
             "pshufd $0x00,%%xmm5,%%xmm8;"
             "pshufd $0x55,%%xmm5,%%xmm9;"
@@ -54,7 +54,7 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
             "addps  %%xmm9,%%xmm8;"
             "addps  %%xmm11,%%xmm10;"
             "addps  %%xmm10,%%xmm8;"
-            "movaps %%xmm8,16(%0);"
+            "movups %%xmm8,16(%0);"
 
             "pshufd $0x00,%%xmm6,%%xmm8;"
             "pshufd $0x55,%%xmm6,%%xmm9;"
@@ -67,7 +67,7 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
             "addps  %%xmm9,%%xmm8;"
             "addps  %%xmm11,%%xmm10;"
             "addps  %%xmm10,%%xmm8;"
-            "movaps %%xmm8,32(%0);"
+            "movups %%xmm8,32(%0);"
 
             "pshufd $0x00,%%xmm7,%%xmm8;"
             "pshufd $0x55,%%xmm7,%%xmm9;"
@@ -80,7 +80,7 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
             "addps  %%xmm9,%%xmm8;"
             "addps  %%xmm11,%%xmm10;"
             "addps  %%xmm10,%%xmm8;"
-            "movaps %%xmm8,48(%0)"
+            "movups %%xmm8,48(%0)"
             :: "r"(d), "r"(s1), "r"(s2)
             : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm10", "xmm11", "memory"
     );
@@ -210,7 +210,7 @@ template<> mat4 &mat4::translate(const vec3 &vec)
             "addps  %1,%0;"
             "addps  %2,%0;"
             "addps  48(%3),%0;"
-            "movaps %0,48(%3)"
+            "movups %0,48(%3)"
             :: "x"(vec.x()), "x"(vec.y()), "x"(vec.z()), "r"(&d[0])
             : "memory"
     );
@@ -362,9 +362,9 @@ template<> mat4 &mat4::scale(const vec3 &fac)
             "mulps   0(%3),%0;"
             "mulps  16(%3),%1;"
             "mulps  32(%3),%2;"
-            "movaps %0, 0(%3);"
-            "movaps %1,16(%3);"
-            "movaps %2,32(%3)"
+            "movups %0, 0(%3);"
+            "movups %1,16(%3);"
+            "movups %2,32(%3)"
             :: "x"(fac.x()), "x"(fac.y()), "x"(fac.z()), "r"(&d[0])
             : "memory"
     );
@@ -406,7 +406,7 @@ template<> void mat3::transposed_invert(void)
     __asm__ __volatile__ (
             "rcpss  %1,%1;"
             "pshufd $0x00,%1,%1;"
-            "movaps  0(%0),%%xmm0;"
+            "movups  0(%0),%%xmm0;"
             "movups 12(%0),%%xmm1;"
             "movups 24(%0),%%xmm2;"
 
@@ -417,8 +417,8 @@ template<> void mat3::transposed_invert(void)
             "pshufd $0x12,%%xmm1,%%xmm7;"
             "pshufd $0x12,%%xmm2,%%xmm8;"
 
-            "movaps %%xmm4,%%xmm9;"
-            "movaps %%xmm7,%%xmm10;"
+            "movups %%xmm4,%%xmm9;"
+            "movups %%xmm7,%%xmm10;"
             "mulps  %%xmm8,%%xmm9;"
             "mulps  %%xmm5,%%xmm10;"
 
@@ -436,7 +436,7 @@ template<> void mat3::transposed_invert(void)
             "mulps  %1,%%xmm5;"
             "mulps  %1,%%xmm3;"
 
-            "movaps %%xmm9, 0(%0);"
+            "movups %%xmm9, 0(%0);"
             "movups %%xmm5,12(%0);"
             "movups %%xmm3,24(%0)"
             :: "r"(d), "x"(det())
@@ -473,9 +473,9 @@ template<> float mat4::det(void)
     float ret;
 
     __asm__ __volatile__ (
-            "movaps 16(%1),%%xmm1;"
-            "movaps 32(%1),%%xmm2;"
-            "movaps 48(%1),%%xmm3;"
+            "movups 16(%1),%%xmm1;"
+            "movups 32(%1),%%xmm2;"
+            "movups 48(%1),%%xmm3;"
 
             "pshufd $0x01,%%xmm1,%%xmm4;"
             "pshufd $0x9E,%%xmm2,%%xmm7;"
@@ -545,10 +545,10 @@ template<> void mat4::transposed_invert(void)
             "rcpss  %1,%1;"
             "pshufd $0x00,%1,%1;"
 
-            "movaps  0(%0),%%xmm1;"
-            "movaps 16(%0),%%xmm2;"
-            "movaps 32(%0),%%xmm3;"
-            "movaps 48(%0),%%xmm4;"
+            "movups  0(%0),%%xmm1;"
+            "movups 16(%0),%%xmm2;"
+            "movups 32(%0),%%xmm3;"
+            "movups 48(%0),%%xmm4;"
 
             "pshufd $0x9E,%%xmm3,%%xmm5;"
             "pshufd $0x7B,%%xmm4,%%xmm6;"
@@ -581,7 +581,7 @@ template<> void mat4::transposed_invert(void)
             "addps  %%xmm6,%%xmm5;"
 
             "mulps  %1,%%xmm5;"
-            "movaps %%xmm5, 0(%0);"
+            "movups %%xmm5, 0(%0);"
 
             "pshufd $0x7B,%%xmm3,%%xmm5;"
             "pshufd $0x9E,%%xmm4,%%xmm6;"
@@ -614,7 +614,7 @@ template<> void mat4::transposed_invert(void)
             "addps  %%xmm6,%%xmm5;"
 
             "mulps  %1,%%xmm5;"
-            "movaps %%xmm5,16(%0);"
+            "movups %%xmm5,16(%0);"
 
             "pshufd $0x9E,%%xmm2,%%xmm5;"
             "pshufd $0x7B,%%xmm4,%%xmm6;"
@@ -644,7 +644,7 @@ template<> void mat4::transposed_invert(void)
             "addps  %%xmm6,%%xmm5;"
 
             "mulps  %1,%%xmm5;"
-            "movaps %%xmm5,32(%0);"
+            "movups %%xmm5,32(%0);"
 
             "pshufd $0x7B,%%xmm2,%%xmm5;"
             "pshufd $0x9E,%%xmm3,%%xmm6;"
@@ -674,7 +674,7 @@ template<> void mat4::transposed_invert(void)
             "addps  %%xmm6,%%xmm5;"
 
             "mulps  %1,%%xmm5;"
-            "movaps %%xmm5,48(%0);"
+            "movups %%xmm5,48(%0);"
             :: "r"(d), "x"(det()) : "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "memory"
     );
 #else
