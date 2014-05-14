@@ -2,6 +2,7 @@
 #define DAKE__GL__SHADER_HPP
 
 #include <stdexcept>
+#include <string>
 #include <QtOpenGL>
 
 
@@ -62,7 +63,7 @@ class program
         void bind_frag(const char *identifier, int location);
 
         template<typename T> dake::gl::uniform<T> uniform(const char *identifier)
-        { return dake::gl::uniform<T>(glGetUniformLocation(id, identifier), this); }
+        { return dake::gl::uniform<T>(glGetUniformLocation(id, identifier), this, identifier); }
 };
 
 
@@ -77,9 +78,9 @@ template<typename T> class uniform
 
     public:
         uniform(void) { id = -1; prg = NULL; }
-        uniform(GLint id, program *prg)
+        uniform(GLint id, program *prg, const char *name = nullptr)
         {
-            if (id < 0) throw std::runtime_error("Could not find uniform");
+            if (id < 0) throw std::runtime_error("Could not find uniform " + std::string(name ? name : "(unknown)"));
             this->id = id;
             this->prg = prg;
         }
