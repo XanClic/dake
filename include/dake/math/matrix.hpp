@@ -176,6 +176,13 @@ template<int R, int C, typename T> class mat
             return ret;
         }
 
+        static mat<R, C, T> projection(float fovy, float aspect, float zn, float zf)
+        {
+            static_assert(R == 4 && C == 4 && std::is_floating_point<T>::value, "projection() is defined for 4x4 floating point matrices only");
+            float f = 1.f / tanf(fovy / 2.f);
+            return mat4(vec4(f / aspect, 0.f, 0.f, 0.f), vec4(0.f, f, 0.f, 0.f), vec4(0.f, 0.f, (zn + zf) / (zn - zf), -1.f), vec4(0.f, 0.f, 2.f * (zn * zf) / (zn - zf), 0.f));
+        }
+
 
         T &x(void)
         { static_assert(R >= 1 && C == 1, "x() is defined for vectors only"); return d[0]; }
