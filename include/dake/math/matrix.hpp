@@ -411,6 +411,16 @@ template<int R, int C, typename T> class mat
         operator T *(void) { return d; }
 
 
+        bool operator==(const mat<R, C, T> &om) const
+        {
+            for (int i = 0; i < C; i++)
+                for (int j = 0; j < R; j++)
+                    if (!(d[i * R + j] == om.d[i * R + j]))
+                        return false;
+            return true;
+        }
+
+
     private:
         char *to_ruby(void) const
         {
