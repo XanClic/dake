@@ -69,7 +69,7 @@ template<int R, int C, typename T> class mat
         T d[R * C];
 
 
-        template<class...Tv, typename std::enable_if<sizeof...(Tv) == C, int>::type = 0>
+        template<class...Tv, typename std::enable_if<sizeof...(Tv) == C && C != 1, int>::type = 0>
         mat(Tv... cols)
         {
             int i = 0;
@@ -88,16 +88,12 @@ template<int R, int C, typename T> class mat
                 d[i++] = val;
         }
 
-        mat(const T *f)
-        { memcpy(d, f, sizeof(d)); }
-
         template<int Ro, int Co, typename To>
         mat(const mat<Ro, Co, To> &mo)
         {
             for (int i = 0; i < C; i++)
                 for (int j = 0; j < R; j++)
-                    if ((i < Co) && (j < Ro))
-                        d[i * R + j] = mo.d[i * Ro + j];
+                    d[i * R + j] = ((i < Co) && (j < Ro)) ? mo.d[i * Ro + j] : T(0);
         }
 
         mat(const char *ruby_desc)
@@ -162,6 +158,9 @@ template<int R, int C, typename T> class mat
             i.make_identity();
             return i;
         }
+
+        static mat<R, C, T> from_data(const T *f)
+        { mat<R, C, T> m; memcpy(m.d, f, sizeof(m.d)); return m; }
 
         template<class...Tv, typename std::enable_if<R == C && sizeof...(Tv) == C, int>::type = 0>
         static mat<R, C, T> diagonal(Tv... vals)
