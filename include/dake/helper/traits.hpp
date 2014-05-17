@@ -19,8 +19,11 @@ namespace helper
 _def_member_test(push);
 _def_member_test(push_back);
 _def_member_test(insert);
+_def_member_test(begin);
+_def_member_test(end);
 
 template<typename T> struct is_pushable { static const bool value = has_push_back<T>::value || has_push<T>::value; };
+template<typename T> struct is_iterable { static const bool value = has_begin<T>::value && has_end<T>::value; };
 
 #undef _def_member_test
 
