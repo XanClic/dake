@@ -54,6 +54,18 @@ T exclusive_disjunction(const T &x, const T &y)
     return x ^ y;
 }
 
+template<typename T>
+const T &maximum(const T &x, const T &y)
+{
+    return (x > y) ? x : y;
+}
+
+template<typename T>
+const T &minimum(const T &x, const T &y)
+{
+    return (x < y) ? x : y;
+}
+
 }
 }
 
