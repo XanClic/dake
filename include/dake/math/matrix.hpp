@@ -455,7 +455,12 @@ template<int R, int C, typename T> class mat
             sprintf(cmd, format, mat_src);
             free(mat_src);
 
+#ifdef __MINGW32__
+            throw std::runtime_error("Windows cannot into popen()");
+            FILE *p;
+#else
             FILE *p = popen(cmd, "r");
+#endif
 
             char *result = static_cast<char *>(malloc(Rr * Cr * 64));
             fread(result, 1, Rr * Cr * 64, p);

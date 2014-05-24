@@ -2,6 +2,7 @@
 #define DAKE__GL__VERTEX_ATTRIB_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <QtOpenGL>
 
 
@@ -33,7 +34,7 @@ class vertex_attrib
         void reuse_buffer(vertex_attrib *va);
         void format(int elements_per_vertex, GLenum type = GL_FLOAT);
 
-        void load(size_t stride = 0, off_t offset = 0);
+        void load(size_t stride = 0, uintptr_t offset = 0);
 
         void data(void *ptr, size_t size = (size_t)-1, GLenum usage = GL_STATIC_DRAW);
 };

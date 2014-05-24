@@ -1,3 +1,5 @@
+#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 
 #include <dake/gl/vertex_array.hpp>
@@ -52,7 +54,7 @@ void dake::gl::vertex_attrib::format(int elements_per_vertex, GLenum type)
 #undef TYPE
 
 
-void dake::gl::vertex_attrib::load(size_t stride, off_t offset)
+void dake::gl::vertex_attrib::load(size_t stride, uintptr_t offset)
 {
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glVertexAttribPointer(attrib, epv, t, GL_FALSE, stride, reinterpret_cast<const void *>(offset));
