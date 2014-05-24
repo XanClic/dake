@@ -1,9 +1,8 @@
 #ifndef DAKE__GL__FRAMEBUFFER_H
 #define DAKE__GL__FRAMEBUFFER_H
 
-#include <QtOpenGL>
-
-#include "texture.hpp"
+#include "dake/gl/gl.hpp"
+#include "dake/gl/texture.hpp"
 
 
 namespace dake

@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS = -O3 -Wall -Wextra -std=c++11 -Iinclude -I/c/Qt/5.3/mingw482_32/include -I/c/Qt/5.3/mingw482_32/include/QtOpenGL -fPIE -DGL_GLEXT_PROTOTYPES
+CXXFLAGS = -O3 -Wall -Wextra -std=c++11 -Iinclude
 AR = ar rcs
 
 OBJECTS = $(patsubst %.cpp,%.o,$(shell find -name '*.cpp' -and -not -path './examples/*'))

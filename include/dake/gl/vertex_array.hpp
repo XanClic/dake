@@ -2,7 +2,8 @@
 #define DAKE__GL__VERTEX_ARRAY_HPP
 
 #include <list>
-#include <QtOpenGL>
+
+#include "dake/gl/gl.hpp"
 
 
 namespace dake

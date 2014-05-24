@@ -2,8 +2,8 @@
 #include <cstdio>
 #include <list>
 #include <string>
-#include <QtOpenGL>
 
+#include <dake/gl/gl.hpp>
 #include <dake/gl/texture.hpp>
 
 
