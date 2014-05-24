@@ -3,7 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <QtOpenGL>
+
+#include "dake/gl/gl.hpp"
 
 
 namespace dake
