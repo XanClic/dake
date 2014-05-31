@@ -68,6 +68,13 @@ template<int R, int C, typename T> class mat
     public:
         T d[R * C];
 
+        enum {
+            rows = R,
+            columns = C
+        };
+
+        typedef T scalar_type;
+
 
         template<class...Tv, typename std::enable_if<sizeof...(Tv) == C && C != 1, int>::type = 0>
         mat(Tv... cols)
@@ -236,10 +243,6 @@ template<int R, int C, typename T> class mat
 
         mat<R, C, T> &operator=(const mat<R, C, T> &om)
         { memcpy(d, om.d, sizeof(d)); return *this; }
-
-
-        int rows(void) const { return R; }
-        int cols(void) const { return C; }
 
 
         template<typename U>
