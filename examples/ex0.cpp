@@ -48,13 +48,13 @@ int main(void)
 
     // matX::diagonal(1.f, ..., (V * U).det())
     auto diag = decltype(U)::identity();
-    diag[diag.cols() - 1][diag.rows() - 1] = (V * U).det();
+    diag[diag.columns - 1][diag.rows - 1] = (V * U).det();
 
     auto R = V * diag * U;
 
     if (R.det() < 0.f)
     {
-        diag[diag.cols() - 1][diag.rows() - 1] *= -1.f;
+        diag[diag.columns - 1][diag.rows - 1] *= -1.f;
         R = V * diag * U;
     }
 
