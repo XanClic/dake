@@ -6,6 +6,19 @@
 #include <dake/gl/texture.hpp>
 
 
+namespace dake
+{
+
+namespace gl
+{
+
+program *active_program;
+
+}
+
+}
+
+
 dake::gl::shader::shader(dake::gl::shader::type tp):
     t(tp)
 {
@@ -145,7 +158,12 @@ bool dake::gl::program::link(void)
 
 void dake::gl::program::use(void)
 {
+    if (dake::gl::active_program == this) {
+        return;
+    }
+
     glUseProgram(id);
+    dake::gl::active_program = this;
 }
 
 

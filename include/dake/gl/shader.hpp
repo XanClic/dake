@@ -1,8 +1,10 @@
 #ifndef DAKE__GL__SHADER_HPP
 #define DAKE__GL__SHADER_HPP
 
+#include <cassert>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 
 #include "dake/gl/gl.hpp"
 
@@ -40,12 +42,18 @@ class shader
 };
 
 
+class program;
+
+extern program *active_program;
+
+
 template<typename T> class uniform;
 
 class program
 {
     private:
         GLuint id;
+        std::unordered_map<std::string, GLint> uniform_locations;
 
 
     public:
@@ -57,14 +65,26 @@ class program
         bool link(void);
         void use(void);
 
-        static void unuse(void) { glUseProgram(0); }
+        static void unuse(void) { glUseProgram(0); active_program = nullptr; }
 
         GLuint attrib(const char *identifier);
         void bind_attrib(const char *identifier, int location);
         void bind_frag(const char *identifier, int location);
 
-        template<typename T> dake::gl::uniform<T> uniform(const char *identifier)
-        { return dake::gl::uniform<T>(glGetUniformLocation(id, identifier), this, identifier); }
+        template<typename T> dake::gl::uniform<T> uniform(const std::string &identifier)
+        {
+            auto pos = uniform_locations.find(identifier);
+            if (pos != uniform_locations.end()) {
+                return dake::gl::uniform<T>(pos->second, this);
+            }
+
+            GLint uni_id = glGetUniformLocation(id, identifier.c_str());
+            if (uni_id < 0) {
+                throw std::invalid_argument(std::string("Could not find uniform ") + identifier);
+            }
+            uniform_locations.emplace(identifier, uni_id);
+            return dake::gl::uniform<T>(uni_id, this);
+        }
 };
 
 
@@ -78,17 +98,17 @@ template<typename T> class uniform
 
 
     public:
-        uniform(void) { id = -1; prg = NULL; }
-        uniform(GLint id, program *prg, const char *name = nullptr)
+        uniform(void) { id = -1; prg = nullptr; }
+        uniform(GLint id, program *prg)
         {
-            if (id < 0) throw std::runtime_error("Could not find uniform " + std::string(name ? name : "(unknown)"));
+            assert(id >= 0);
             this->id = id;
             this->prg = prg;
         }
 
         uniform<T> &operator=(const T &value)
         {
-            if ((id < 0) || !prg) throw std::runtime_error("Uniform has not been looked up yet");
+            if ((id < 0) || !prg) throw std::invalid_argument("Uniform has not been looked up yet");
             prg->use();
             assign(value);
             return *this;
