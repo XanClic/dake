@@ -1,3 +1,7 @@
+#include <cassert>
+#include <cstdint>
+
+#include <dake/gl/gl.hpp>
 #include <dake/gl/vertex_array.hpp>
 #include <dake/gl/vertex_attrib.hpp>
 
@@ -8,7 +12,7 @@ namespace dake
 namespace gl
 {
 
-dake::gl::vertex_array *cur_va = NULL;
+dake::gl::vertex_array *cur_va = nullptr;
 
 }
 
@@ -24,11 +28,11 @@ dake::gl::vertex_array::vertex_array(void)
 dake::gl::vertex_array::~vertex_array(void)
 {
     if (dake::gl::cur_va == this)
-        dake::gl::cur_va = NULL;
+        dake::gl::cur_va = nullptr;
 
     glDeleteVertexArrays(1, &id);
 
-    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); i++)
+    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i)
         delete *i;
 }
 
@@ -41,7 +45,9 @@ void dake::gl::vertex_array::set_elements(size_t count)
 
 dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint id)
 {
-    for (std::list<vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); i++)
+    assert(id < (sizeof(uintmax_t) * 8));
+
+    for (std::list<vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i)
         if ((*i)->attrib == id)
             return *i;
 
@@ -57,25 +63,46 @@ dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint id)
 }
 
 
+static uintmax_t enabled_vertex_arrays;
+
+
 void dake::gl::vertex_array::bind(void)
 {
     if (dake::gl::cur_va == this)
         return;
-    else if (dake::gl::cur_va)
-        dake::gl::cur_va->unbind_single();
+
+    uintmax_t enable_vertex_arrays = 0;
+
+    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i) {
+        enable_vertex_arrays |= UINTMAX_C(1) << (*i)->attrib;
+    }
+
+    uintmax_t difference = enable_vertex_arrays ^ enabled_vertex_arrays;
+
+    for (GLuint id = 0; id < sizeof(uintmax_t) * 8; id++) {
+        if (difference & (UINTMAX_C(1) << id)) {
+            if (enable_vertex_arrays & (UINTMAX_C(1) << id)) {
+                glEnableVertexAttribArray(id);
+            } else {
+                glDisableVertexAttribArray(id);
+            }
+        }
+    }
+
+    enabled_vertex_arrays = enable_vertex_arrays;
 
     glBindVertexArray(id);
-    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); i++)
-        glEnableVertexAttribArray((*i)->attrib);
-
     dake::gl::cur_va = this;
 }
 
 
 void dake::gl::vertex_array::unbind_single(void)
 {
-    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); i++)
+    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); i++) {
         glDisableVertexAttribArray((*i)->attrib);
+    }
+
+    enabled_vertex_arrays = 0;
 }
 
 
