@@ -56,6 +56,8 @@ dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint id)
     dake::gl::vertex_attrib *va = new dake::gl::vertex_attrib(this, id);
     attribs.push_back(va);
 
+    glEnableVertexAttribArray(id);
+
     // FIXME, somehow
     dake::gl::cur_va = nullptr;
 
@@ -63,33 +65,10 @@ dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint id)
 }
 
 
-static uintmax_t enabled_vertex_arrays;
-
-
 void dake::gl::vertex_array::bind(void)
 {
     if (dake::gl::cur_va == this)
         return;
-
-    uintmax_t enable_vertex_arrays = 0;
-
-    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i) {
-        enable_vertex_arrays |= UINTMAX_C(1) << (*i)->attrib;
-    }
-
-    uintmax_t difference = enable_vertex_arrays ^ enabled_vertex_arrays;
-
-    for (GLuint id = 0; id < sizeof(uintmax_t) * 8; id++) {
-        if (difference & (UINTMAX_C(1) << id)) {
-            if (enable_vertex_arrays & (UINTMAX_C(1) << id)) {
-                glEnableVertexAttribArray(id);
-            } else {
-                glDisableVertexAttribArray(id);
-            }
-        }
-    }
-
-    enabled_vertex_arrays = enable_vertex_arrays;
 
     glBindVertexArray(id);
     dake::gl::cur_va = this;
@@ -98,11 +77,6 @@ void dake::gl::vertex_array::bind(void)
 
 void dake::gl::vertex_array::unbind_single(void)
 {
-    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); i++) {
-        glDisableVertexAttribArray((*i)->attrib);
-    }
-
-    enabled_vertex_arrays = 0;
 }
 
 
