@@ -39,7 +39,7 @@ class vertex_array
         vertex_attrib *attrib(GLuint id);
 
         void bind(void);
-        static void unbind(void) { cur_va->unbind_single(); glBindVertexArray(0); }
+        static void unbind(void) { if (!cur_va) return; cur_va->unbind_single(); glBindVertexArray(0); cur_va = nullptr; }
 
         void draw(GLenum type, int start_index = 0);
 };
