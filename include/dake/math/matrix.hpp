@@ -299,7 +299,12 @@ template<int R, int C, typename T> class mat
             return ret;
         }
 
-        mat<R, C, T> &operator*=(const mat<R, C, T> &om);
+        mat<R, C, T> &operator*=(const mat<R, C, T> &om)
+        {
+            static_assert(R == C, "operator*=() is defined for square matrices only");
+
+            return *this = *this * om;
+        }
 
         template<typename U>
         mat<R, C, T> &operator*=(const U &scale)

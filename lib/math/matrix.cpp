@@ -21,32 +21,56 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
 #ifdef X64_ASSEMBLY
     __asm__ __volatile__ (
             "movups  0(%1),%%xmm0;"
+            // xmm0  = (a30, a20, a10, a00)
             "movups 16(%1),%%xmm1;"
+            // xmm1  = (a31, a21, a11, a01)
             "movups 32(%1),%%xmm2;"
+            // xmm2  = (a32, a22, a12, a02)
             "movups 48(%1),%%xmm3;"
+            // xmm3  = (a33, a23, a13, a03)
 
             "movups  0(%2),%%xmm4;"
+            // xmm4  = (b30, b20, b10, b00)
             "movups 16(%2),%%xmm5;"
+            // xmm5  = (b31, b21, b11, b01)
             "movups 32(%2),%%xmm6;"
+            // xmm6  = (b32, b22, b12, b02)
             "movups 48(%2),%%xmm7;"
+            // xmm7  = (b33, b23, b13, b03)
 
             "pshufd $0x00,%%xmm4,%%xmm8;"
+            // xmm8  = (b00, b00, b00, b00)
             "pshufd $0x55,%%xmm4,%%xmm9;"
+            // xmm9  = (b10, b10, b10, b10)
             "pshufd $0xaa,%%xmm4,%%xmm10;"
+            // xmm10 = (b20, b20, b20, b20)
             "pshufd $0xff,%%xmm4,%%xmm11;"
+            // xmm11 = (b30, b30, b30, b30)
             "mulps  %%xmm0,%%xmm8;"
+            // xmm8  = (a30 * b00, a20 * b00, a10 * b00, a00 * b00)
             "mulps  %%xmm1,%%xmm9;"
+            // xmm9  = (a31 * b10, a21 * b10, a11 * b10, a01 * b10)
             "mulps  %%xmm2,%%xmm10;"
+            // xmm10 = (a32 * b20, a22 * b20, a12 * b20, a02 * b20)
             "mulps  %%xmm3,%%xmm11;"
+            // xmm11 = (a33 * b30, a23 * b30, a13 * b30, a03 * b30)
             "addps  %%xmm9,%%xmm8;"
             "addps  %%xmm11,%%xmm10;"
             "addps  %%xmm10,%%xmm8;"
+            // xmm8 = (a33 * b30 + a32 * b20 + a31 * b10 + a30 * b00, => c30
+            //         a23 * b30 + a22 * b20 + a21 * b10 + a20 * b00, => c20
+            //         a13 * b30 + a12 * b20 + a11 * b10 + a10 * b00, => c10
+            //         a03 * b30 + a02 * b20 + a01 * b10 + a00 * b00) => c00
             "movups %%xmm8, 0(%0);"
 
             "pshufd $0x00,%%xmm5,%%xmm8;"
+            // xmm8  = (b01, b01, b01, b01)
             "pshufd $0x55,%%xmm5,%%xmm9;"
+            // xmm9  = (b11, b11, b11, b11)
             "pshufd $0xaa,%%xmm5,%%xmm10;"
+            // xmm10 = (b21, b21, b21, b21)
             "pshufd $0xff,%%xmm5,%%xmm11;"
+            // xmm11 = (b31, b31, b31, b31)
             "mulps  %%xmm0,%%xmm8;"
             "mulps  %%xmm1,%%xmm9;"
             "mulps  %%xmm2,%%xmm10;"
@@ -54,6 +78,10 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
             "addps  %%xmm9,%%xmm8;"
             "addps  %%xmm11,%%xmm10;"
             "addps  %%xmm10,%%xmm8;"
+            // xmm8 = (a33 * b31 + a32 * b21 + a31 * b11 + a30 * b01, => c31
+            //         a23 * b31 + a22 * b21 + a21 * b11 + a20 * b01, => c21
+            //         a13 * b31 + a12 * b21 + a11 * b11 + a10 * b01, => c11
+            //         a03 * b31 + a02 * b21 + a01 * b11 + a00 * b01) => c01
             "movups %%xmm8,16(%0);"
 
             "pshufd $0x00,%%xmm6,%%xmm8;"
@@ -254,9 +282,9 @@ template<> mat4 &mat4::rotate(float angle, const vec3 &axis)
 
 #ifdef X64_ASSEMBLY
     float rm[16] = {
-        x * x * omc +     c, x * y * omc - z * s, x * z * omc + y * s, 0.f,
-        y * x * omc + z * s, y * y * omc +     c, y * z * omc - x * s, 0.f,
-        z * x * omc - y * s, z * y * omc + x * s, z * z * omc +     c, 0.f,
+        x * x * omc +     c, x * y * omc + z * s, x * z * omc - y * s, 0.f,
+        y * x * omc - z * s, y * y * omc +     c, y * z * omc + x * s, 0.f,
+        z * x * omc + y * s, z * y * omc - x * s, z * z * omc +     c, 0.f,
                         0.f,                 0.f,                 0.f, 1.f
     };
 
@@ -277,18 +305,21 @@ template<> mat4 &mat4::rotate(float angle, const vec3 &axis)
     float n00 = d[ 0] * _00 + d[ 4] * _10 + d[ 8] * _20;
     float n01 = d[ 1] * _00 + d[ 5] * _10 + d[ 9] * _20;
     float n02 = d[ 2] * _00 + d[ 6] * _10 + d[10] * _20;
+    float n03 = d[ 3] * _00 + d[ 7] * _10 + d[11] * _20;
 
     float n04 = d[ 0] * _01 + d[ 4] * _11 + d[ 8] * _21;
     float n05 = d[ 1] * _01 + d[ 5] * _11 + d[ 9] * _21;
     float n06 = d[ 2] * _01 + d[ 6] * _11 + d[10] * _21;
+    float n07 = d[ 3] * _01 + d[ 7] * _11 + d[11] * _21;
 
     float n08 = d[ 0] * _02 + d[ 4] * _12 + d[ 8] * _22;
     float n09 = d[ 1] * _02 + d[ 5] * _12 + d[ 9] * _22;
     float n10 = d[ 2] * _02 + d[ 6] * _12 + d[10] * _22;
+    float n11 = d[ 3] * _02 + d[ 7] * _12 + d[11] * _22;
 
-    d[ 0] = n00; d[ 1] = n01; d[ 2] = n02;
-    d[ 4] = n04; d[ 5] = n05; d[ 6] = n06;
-    d[ 8] = n08; d[ 9] = n09; d[10] = n10;
+    d[ 0] = n00; d[ 1] = n01; d[ 2] = n02; d[ 3] = n03;
+    d[ 4] = n04; d[ 5] = n05; d[ 6] = n06; d[ 7] = n07;
+    d[ 8] = n08; d[ 9] = n09; d[10] = n10; d[11] = n11;
 #endif
 
     return *this;
@@ -313,9 +344,9 @@ template<> mat4 mat4::rotated(float angle, const vec3 &axis) const
 
 #ifdef X64_ASSEMBLY
     float rm[16] = {
-        x * x * omc +     c, x * y * omc - z * s, x * z * omc + y * s, 0.f,
-        y * x * omc + z * s, y * y * omc +     c, y * z * omc - x * s, 0.f,
-        z * x * omc - y * s, z * y * omc + x * s, z * z * omc +     c, 0.f,
+        x * x * omc +     c, x * y * omc + z * s, x * z * omc - y * s, 0.f,
+        y * x * omc - z * s, y * y * omc +     c, y * z * omc + x * s, 0.f,
+        z * x * omc + y * s, z * y * omc - x * s, z * z * omc +     c, 0.f,
                         0.f,                 0.f,                 0.f, 1.f
     };
 
@@ -336,18 +367,21 @@ template<> mat4 mat4::rotated(float angle, const vec3 &axis) const
     float n00 = d[ 0] * _00 + d[ 4] * _10 + d[ 8] * _20;
     float n01 = d[ 1] * _00 + d[ 5] * _10 + d[ 9] * _20;
     float n02 = d[ 2] * _00 + d[ 6] * _10 + d[10] * _20;
+    float n03 = d[ 3] * _00 + d[ 7] * _10 + d[11] * _20;
 
     float n04 = d[ 0] * _01 + d[ 4] * _11 + d[ 8] * _21;
     float n05 = d[ 1] * _01 + d[ 5] * _11 + d[ 9] * _21;
     float n06 = d[ 2] * _01 + d[ 6] * _11 + d[10] * _21;
+    float n07 = d[ 3] * _01 + d[ 7] * _11 + d[11] * _21;
 
     float n08 = d[ 0] * _02 + d[ 4] * _12 + d[ 8] * _22;
     float n09 = d[ 1] * _02 + d[ 5] * _12 + d[ 9] * _22;
     float n10 = d[ 2] * _02 + d[ 6] * _12 + d[10] * _22;
+    float n11 = d[ 3] * _02 + d[ 7] * _12 + d[11] * _22;
 
-    return mat4(vec4( n00 ,  n01 ,  n02 , d[ 3]),
-                vec4( n04 ,  n05 ,  n06 , d[ 7]),
-                vec4( n08 ,  n09 ,  n10 , d[11]),
+    return mat4(vec4( n00 ,  n01 ,  n02 ,  n03 ),
+                vec4( n04 ,  n05 ,  n06 ,  n07 ),
+                vec4( n08 ,  n09 ,  n10 ,  n11 ),
                 vec4(d[12], d[13], d[14], d[15]));
 #endif
 }
