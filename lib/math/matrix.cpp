@@ -438,7 +438,6 @@ template<> void mat3::transposed_invert(void)
 {
 #ifdef X64_ASSEMBLY
     __asm__ __volatile__ (
-            "rcpss  %1,%1;"
             "pshufd $0x00,%1,%1;"
             "movups  0(%0),%%xmm0;"
             "movups 12(%0),%%xmm1;"
@@ -473,7 +472,7 @@ template<> void mat3::transposed_invert(void)
             "movups %%xmm9, 0(%0);"
             "movups %%xmm5,12(%0);"
             "movups %%xmm3,24(%0)"
-            :: "r"(d), "x"(det())
+            :: "r"(d), "x"(1.f / det())
             : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "memory"
     );
 #else
@@ -576,7 +575,6 @@ template<> void mat4::transposed_invert(void)
 {
 #ifdef X64_ASSEMBLY
     __asm__ __volatile__ (
-            "rcpss  %1,%1;"
             "pshufd $0x00,%1,%1;"
 
             "movups  0(%0),%%xmm1;"
@@ -709,7 +707,7 @@ template<> void mat4::transposed_invert(void)
 
             "mulps  %1,%%xmm5;"
             "movups %%xmm5,48(%0);"
-            :: "r"(d), "x"(det()) : "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "memory"
+            :: "r"(d), "x"(1.f / det()) : "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "memory"
     );
 #else
     float dt = 1.f / det();
