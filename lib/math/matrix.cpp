@@ -434,7 +434,7 @@ template<> float mat3::det(void)
            d[6] * (d[1] * d[5] - d[2] * d[4]);
 }
 
-template<> void mat3::transposed_invert(void)
+template<> mat3 &mat3::transposed_invert(void)
 {
 #ifdef X64_ASSEMBLY
     __asm__ __volatile__ (
@@ -492,6 +492,8 @@ template<> void mat3::transposed_invert(void)
 
     memcpy(d, nd, sizeof(d));
 #endif
+
+    return *this;
 }
 
 
@@ -571,7 +573,7 @@ template<> float mat4::det(void)
         x * (le(a1, a2, a3, a4, a5) + le(a6, a7, a8, a9, aA) + le(aB, aC, aD, aE, aF))
 #endif
 
-template<> void mat4::transposed_invert(void)
+template<> mat4 &mat4::transposed_invert(void)
 {
 #ifdef X64_ASSEMBLY
     __asm__ __volatile__ (
@@ -733,6 +735,8 @@ template<> void mat4::transposed_invert(void)
 
     memcpy(d, nd, sizeof(nd));
 #endif
+
+    return *this;
 }
 
 
