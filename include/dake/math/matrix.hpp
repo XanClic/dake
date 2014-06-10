@@ -328,7 +328,14 @@ template<int R, int C, typename T> class mat
 
 
         T det(void);
-        void transposed_invert();
+        mat<R, C, T> &transposed_invert(void);
+
+        mat<R, C, T> transposed_inverse(void) const
+        { mat<R, C, T> ret(*this); ret.transposed_invert(); return ret; }
+        mat<R, C, T> &invert(void)
+        { transposed_invert(); transpose(); return *this; }
+        mat<R, C, T> inverse(void) const
+        { mat<R, C, T> ret(*this); ret.invert(); return ret; }
 
         mat<C, R, T> &translate(const vec<3, T> &vec);
         mat<C, R, T> translated(const vec<3, T> &vec) const;
