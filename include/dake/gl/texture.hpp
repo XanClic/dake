@@ -1,7 +1,7 @@
 #ifndef DAKE__GL__TEXTURE_HPP
 #define DAKE__GL__TEXTURE_HPP
 
-#include <list>
+#include <vector>
 #include <string>
 
 #include "dake/gl/gl.hpp"
@@ -44,7 +44,7 @@ class texture
 class texture_manager
 {
     private:
-        std::list<texture *> textures;
+        std::vector<texture *> textures;
 
     public:
         ~texture_manager(void);
