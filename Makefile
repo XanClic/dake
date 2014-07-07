@@ -22,4 +22,4 @@ examples/%: examples/%.cpp $(LIB)
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LIB) -lm
 
 clean:
-	$(RM) $(OBJECTS) $(LIB)
+	$(RM) $(OBJECTS) $(LIB) $(EXAMPLES)
