@@ -37,7 +37,7 @@ dake::gl::framebuffer::~framebuffer(void)
 void dake::gl::framebuffer::resize(int w, int h)
 {
     for (int i = 0; i < ca_count; i++) {
-        textures[i].format(GL_RGBA, w, h, GL_RGBA, GL_FLOAT);
+        textures[i].format(GL_RGBA16F, w, h, GL_RGBA, GL_FLOAT);
     }
     depth.format(GL_DEPTH_COMPONENT24, w, h, GL_DEPTH_COMPONENT, GL_FLOAT);
 }
