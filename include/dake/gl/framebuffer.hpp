@@ -31,6 +31,9 @@ class framebuffer
 
         void bind(void);
 
+        void mask(int i);
+        void unmask(int i);
+
         static void unbind(void) { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); glDrawBuffer(GL_BACK); }
 };
 
