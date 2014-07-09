@@ -435,6 +435,11 @@ template<int R, int C, typename T> class mat
             return true;
         }
 
+        bool operator!=(const mat<R, C, T> &om) const
+        {
+            return !(*this == om);
+        }
+
 
     private:
         char *to_ruby(void) const
