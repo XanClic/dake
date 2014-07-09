@@ -15,6 +15,8 @@ namespace gl
 
 class vertex_array;
 
+extern vertex_attrib *vattr;
+
 class vertex_attrib {
     private:
         GLuint buffer, attrib;
@@ -25,6 +27,8 @@ class vertex_attrib {
         vertex_array *va;
 
         friend class vertex_array;
+
+        void bind(void);
 
 
     public:
@@ -37,6 +41,9 @@ class vertex_attrib {
         void load(size_t stride = 0, uintptr_t offset = 0);
 
         void data(void *ptr, size_t size = static_cast<size_t>(-1), GLenum usage = GL_STATIC_DRAW);
+
+        void *map(bool readable = false);
+        void unmap(void);
 };
 
 }
