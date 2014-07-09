@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdint>
 
+#include <dake/gl/elements_array.hpp>
 #include <dake/gl/gl.hpp>
 #include <dake/gl/vertex_array.hpp>
 #include <dake/gl/vertex_attrib.hpp>
@@ -27,13 +28,17 @@ dake::gl::vertex_array::vertex_array(void)
 
 dake::gl::vertex_array::~vertex_array(void)
 {
-    if (dake::gl::cur_va == this)
+    if (dake::gl::cur_va == this) {
         dake::gl::cur_va = nullptr;
+    }
 
     glDeleteVertexArrays(1, &id);
 
-    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i)
+    for (std::list<dake::gl::vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i) {
         delete *i;
+    }
+
+    delete index_buffer;
 }
 
 
@@ -47,9 +52,11 @@ dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint id)
 {
     assert(id < (sizeof(uintmax_t) * 8));
 
-    for (std::list<vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i)
-        if ((*i)->attrib == id)
+    for (std::list<vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i) {
+        if ((*i)->attrib == id) {
             return *i;
+        }
+    }
 
     bind();
 
@@ -67,8 +74,9 @@ dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint id)
 
 void dake::gl::vertex_array::bind(void)
 {
-    if (dake::gl::cur_va == this)
+    if (dake::gl::cur_va == this) {
         return;
+    }
 
     glBindVertexArray(id);
     dake::gl::cur_va = this;
@@ -83,5 +91,22 @@ void dake::gl::vertex_array::unbind_single(void)
 void dake::gl::vertex_array::draw(GLenum type, int start_index)
 {
     bind();
-    glDrawArrays(type, start_index, n);
+
+    if (index_buffer) {
+        index_buffer->bind();
+        glDrawElements(type, n, index_buffer->t, nullptr);
+    } else {
+        dake::gl::elements_array::unbind();
+        glDrawArrays(type, start_index, n);
+    }
+}
+
+
+dake::gl::elements_array *dake::gl::vertex_array::indices(void)
+{
+    if (!index_buffer) {
+        index_buffer = new elements_array(this);
+    }
+
+    return index_buffer;
 }
