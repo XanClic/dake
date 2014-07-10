@@ -1,12 +1,17 @@
 #include <dake/gl/framebuffer.hpp>
 
 
-dake::gl::framebuffer::framebuffer(int color_attachments):
+dake::gl::framebuffer::framebuffer(int color_attachments, GLenum format):
     ca_count(color_attachments)
 {
     draw_buffers = new GLenum[ca_count];
     for (int i = 0; i < ca_count; i++) {
         draw_buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+    }
+
+    formats = new GLenum[ca_count];
+    for (int i = 0; i < ca_count; i++) {
+        formats[i] = format;
     }
 
     glGenFramebuffers(1, &id);
@@ -30,16 +35,28 @@ dake::gl::framebuffer::~framebuffer(void)
 {
     glDeleteFramebuffers(1, &id);
     delete[] textures;
+    delete[] formats;
     delete[] draw_buffers;
 }
 
 
 void dake::gl::framebuffer::resize(int w, int h)
 {
+    width = w;
+    height = h;
+
     for (int i = 0; i < ca_count; i++) {
-        textures[i].format(GL_RGBA16F, w, h, GL_RGBA, GL_FLOAT);
+        textures[i].format(formats[i], w, h, GL_RGBA, GL_FLOAT);
     }
     depth.format(GL_DEPTH_COMPONENT24, w, h, GL_DEPTH_COMPONENT, GL_FLOAT);
+}
+
+
+void dake::gl::framebuffer::color_format(int i, GLenum format)
+{
+    formats[i] = format;
+
+    resize(width, height);
 }
 
 
