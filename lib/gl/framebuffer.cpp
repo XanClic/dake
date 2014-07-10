@@ -26,8 +26,8 @@ dake::gl::framebuffer::framebuffer(int color_attachments, GLenum format):
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, textures[i].get_glid(), 0);
     }
 
-    depth.filter(GL_NEAREST);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.get_glid(), 0);
+    depth_buffer.filter(GL_NEAREST);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_buffer.get_glid(), 0);
 }
 
 
@@ -48,7 +48,7 @@ void dake::gl::framebuffer::resize(int w, int h)
     for (int i = 0; i < ca_count; i++) {
         textures[i].format(formats[i], w, h, GL_RGBA, GL_FLOAT);
     }
-    depth.format(GL_DEPTH_COMPONENT24, w, h, GL_DEPTH_COMPONENT, GL_FLOAT);
+    depth_buffer.format(GL_DEPTH_COMPONENT24, w, h, GL_DEPTH_COMPONENT, GL_FLOAT);
 }
 
 
@@ -70,6 +70,12 @@ void dake::gl::framebuffer::bind(void)
 dake::gl::texture &dake::gl::framebuffer::operator[](int i)
 {
     return textures[i];
+}
+
+
+dake::gl::texture &dake::gl::framebuffer::depth(void)
+{
+    return depth_buffer;
 }
 
 
