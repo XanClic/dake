@@ -17,7 +17,7 @@ class framebuffer
         int ca_count;
         GLuint id;
         texture *textures;
-        texture depth;
+        texture depth_buffer;
         GLenum *draw_buffers;
         GLenum *formats;
         int width, height;
@@ -28,6 +28,7 @@ class framebuffer
         ~framebuffer(void);
 
         texture &operator[](int i);
+        texture &depth(void);
 
         void resize(int w, int h);
         void color_format(int i, GLenum format);
