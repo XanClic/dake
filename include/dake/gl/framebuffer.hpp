@@ -19,15 +19,18 @@ class framebuffer
         texture *textures;
         texture depth;
         GLenum *draw_buffers;
+        GLenum *formats;
+        int width, height;
 
 
     public:
-        framebuffer(int color_attachments);
+        framebuffer(int color_attachments, GLenum format = GL_RGBA);
         ~framebuffer(void);
 
         texture &operator[](int i);
 
         void resize(int w, int h);
+        void color_format(int i, GLenum format);
 
         void bind(void);
 
