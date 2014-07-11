@@ -41,6 +41,7 @@ void dake::gl::vertex_attrib::bind(void)
         return;
     }
 
+    va->bind();
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     curr_vattr = this;
 }
@@ -85,7 +86,7 @@ void dake::gl::vertex_attrib::load(size_t stride, uintptr_t offset)
 }
 
 
-void dake::gl::vertex_attrib::data(void *ptr, size_t size, GLenum usage)
+void dake::gl::vertex_attrib::data(const void *ptr, size_t size, GLenum usage)
 {
     if (size == static_cast<size_t>(-1)) {
         size = va->n * bpv;
