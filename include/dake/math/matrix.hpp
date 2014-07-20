@@ -58,13 +58,13 @@ typedef mat<4, 4, int> mat4i;
 
 static inline void _skip_space(const char **ptr)
 {
-    while (isspace(**ptr))
+    while (isspace(**ptr)) {
         (*ptr)++;
+    }
 }
 
 
-template<int R, int C, typename T> class mat
-{
+template<int R, int C, typename T> class mat {
     public:
         T d[R * C];
 
@@ -80,8 +80,7 @@ template<int R, int C, typename T> class mat
         mat(Tv... cols)
         {
             int i = 0;
-            for (const mat<R, 1, T> &col: {cols...})
-            {
+            for (const mat<R, 1, T> &col: {cols...}) {
                 memcpy(&d[i], col, sizeof(col));
                 i += R;
             }
@@ -91,58 +90,59 @@ template<int R, int C, typename T> class mat
         mat(Tv... vals)
         {
             int i = 0;
-            for (const T &val: {vals...})
+            for (const T &val: {vals...}) {
                 d[i++] = val;
+            }
         }
 
         template<int Ro, int Co, typename To>
         mat(const mat<Ro, Co, To> &mo)
         {
-            for (int i = 0; i < C; i++)
-                for (int j = 0; j < R; j++)
+            for (int i = 0; i < C; i++) {
+                for (int j = 0; j < R; j++) {
                     d[i * R + j] = ((i < Co) && (j < Ro)) ? mo.d[i * Ro + j] : T(0);
+                }
+            }
         }
 
         mat(const char *ruby_desc)
         {
             _skip_space(&ruby_desc);
-            if (strncmp(ruby_desc, "Matrix[", sizeof("Matrix[") - 1))
+            if (strncmp(ruby_desc, "Matrix[", sizeof("Matrix[") - 1)) {
                 throw std::runtime_error("Matrix description not prefixed by \"Matrix[\"");
+            }
             ruby_desc += sizeof("Matrix[") - 1;
 
-            for (int i = 0; i < R; i++)
-            {
+            for (int i = 0; i < R; i++) {
                 _skip_space(&ruby_desc);
-                if (*(ruby_desc++) != '[')
+                if (*(ruby_desc++) != '[') {
                     throw std::runtime_error("Matrix parsing error: Expected [ for start of row");
+                }
 
-                for (int j = 0; j < C; j++)
-                {
+                for (int j = 0; j < C; j++) {
                     _skip_space(&ruby_desc);
                     d[j * R + i] = strtod(ruby_desc, const_cast<char **>(&ruby_desc));
                     _skip_space(&ruby_desc);
-                    if (j == C - 1)
-                    {
-                        if (*(ruby_desc++) != ']')
+                    if (j == C - 1) {
+                        if (*(ruby_desc++) != ']') {
                             throw std::runtime_error("Matrix parsing error: Expected ] for end of row");
-                    }
-                    else
-                    {
-                        if (*(ruby_desc++) != ',')
+                        }
+                    } else {
+                        if (*(ruby_desc++) != ',') {
                             throw std::runtime_error("Matrix parsing error: Expected , between row elements");
+                        }
                     }
                 }
 
                 _skip_space(&ruby_desc);
-                if (i == R - 1)
-                {
-                    if (*(ruby_desc++) != ']')
+                if (i == R - 1) {
+                    if (*(ruby_desc++) != ']') {
                         throw std::runtime_error("Matrix parsing error: Expected ] for end of matrix");
-                }
-                else
-                {
-                    if (*(ruby_desc++) != ',')
+                    }
+                } else {
+                    if (*(ruby_desc++) != ',') {
                         throw std::runtime_error("Matrix parsing error: Expected , between rows");
+                    }
                 }
             }
         }
@@ -174,8 +174,7 @@ template<int R, int C, typename T> class mat
         {
             mat<R, C, T> ret = mat<R, C, T>::zero();
             int i = 0;
-            for (const T &v: {vals...})
-            {
+            for (const T &v: {vals...}) {
                 ret.d[i * R + i] = v;
                 i++;
             }
@@ -272,14 +271,13 @@ template<int R, int C, typename T> class mat
         {
             mat<R, Co, decltype(d[0] * om.d[0])> ret;
 
-            for (int i = 0; i < Co; i++)
-            {
-                for (int j = 0; j < R; j++)
-                {
+            for (int i = 0; i < Co; i++) {
+                for (int j = 0; j < R; j++) {
                     float val = 0.f;
 
-                    for (int k = 0; k < C; k++)
+                    for (int k = 0; k < C; k++) {
                         val += d[k * R + j] * om.d[i * C + k];
+                    }
 
                     ret.d[i * R + j] = val;
                 }
@@ -289,12 +287,13 @@ template<int R, int C, typename T> class mat
         }
 
         template<typename U>
-        auto operator*(const U &scale) const -> mat<R, C, decltype(d[0] * scale)>
+        auto operator*(const U &scale_v) const -> mat<R, C, decltype(d[0] * scale_v)>
         {
-            mat<R, C, decltype(d[0] * scale)> ret;
+            mat<R, C, decltype(d[0] * scale_v)> ret;
 
-            for (int i = 0; i < R * C; i++)
-                ret.d[i] = d[i] * scale;
+            for (int i = 0; i < R * C; i++) {
+                ret.d[i] = d[i] * scale_v;
+            }
 
             return ret;
         }
@@ -307,24 +306,25 @@ template<int R, int C, typename T> class mat
         }
 
         template<typename U>
-        mat<R, C, T> &operator*=(const U &scale)
-        { for (int i = 0; i < R * C; i++) d[i] *= scale; return *this; }
+        mat<R, C, T> &operator*=(const U &scale_v)
+        { for (int i = 0; i < R * C; i++) d[i] *= scale_v; return *this; }
 
 
         template<typename U>
-        auto operator/(const U &scale) const -> mat<R, C, decltype(d[0] / scale)>
+        auto operator/(const U &scale_v) const -> mat<R, C, decltype(d[0] / scale_v)>
         {
-            mat<R, C, decltype(d[0] / scale)> ret;
+            mat<R, C, decltype(d[0] / scale_v)> ret;
 
-            for (int i = 0; i < R * C; i++)
-                ret.d[i] = d[i] / scale;
+            for (int i = 0; i < R * C; i++) {
+                ret.d[i] = d[i] / scale_v;
+            }
 
             return ret;
         }
 
         template<typename U>
-        mat<R, C, T> &operator/=(const U &scale)
-        { for (int i = 0; i < R * C; i++) d[i] /= scale; return *this; }
+        mat<R, C, T> &operator/=(const U &scale_v)
+        { for (int i = 0; i < R * C; i++) d[i] /= scale_v; return *this; }
 
 
         T det(void);
@@ -350,20 +350,23 @@ template<int R, int C, typename T> class mat
             static_assert(R == C, "make_identity() is defined for square matrices only");
 
             memset(d, 0, sizeof(d));
-            for (int i = 0; i < R; i++)
-                d[i * R + i] = (T)1;
+            for (int i = 0; i < R; i++) {
+                d[i * R + i] = T(1);
+            }
         }
 
 
         mat<C, R, T> transposed(void) const
         {
-            mat<C, R, T> t;
+            mat<C, R, T> tm;
 
-            for (int i = 0; i < C; i++)
-                for (int j = 0; j < R; j++)
-                    t.d[j * C + i] = d[i * R + j];
+            for (int i = 0; i < C; i++) {
+                for (int j = 0; j < R; j++) {
+                    tm.d[j * C + i] = d[i * R + j];
+                }
+            }
 
-            return t;
+            return tm;
         }
 
         mat<R, C, T> &transpose(void)
@@ -399,8 +402,9 @@ template<int R, int C, typename T> class mat
             static_assert(C == 1, "dot() is defined for vectors only");
 
             decltype(d[0] * ov.d[0]) ret(0);
-            for (int i = 0; i < R; i++)
+            for (int i = 0; i < R; i++) {
                 ret += d[i] * ov[i];
+            }
 
             return ret;
         }
@@ -410,8 +414,9 @@ template<int R, int C, typename T> class mat
             static_assert(C == 1, "length() is defined for vectors only");
 
             _double_default(T) len(0);
-            for (int i = 0; i < R; i++)
+            for (int i = 0; i < R; i++) {
                 len += d[i] * d[i];
+            }
             return std::sqrt(len);
         }
 
@@ -428,10 +433,13 @@ template<int R, int C, typename T> class mat
 
         bool operator==(const mat<R, C, T> &om) const
         {
-            for (int i = 0; i < C; i++)
-                for (int j = 0; j < R; j++)
-                    if (!(d[i * R + j] == om.d[i * R + j]))
+            for (int i = 0; i < C; i++) {
+                for (int j = 0; j < R; j++) {
+                    if (!(d[i * R + j] == om.d[i * R + j])) {
                         return false;
+                    }
+                }
+            }
             return true;
         }
 
@@ -445,21 +453,21 @@ template<int R, int C, typename T> class mat
         char *to_ruby(void) const
         {
             // A bit too much, but who cares
-            size_t length = sizeof("Matrix[]");
-            for (int i = 0; i < R; i++)
-            {
-                length += sizeof("[],") - 1;
-                for (int j = 0; j < C; j++)
-                    length += snprintf(NULL, 0, "%g,", d[j * R + i]);
+            size_t slength = sizeof("Matrix[]");
+            for (int i = 0; i < R; i++) {
+                slength += sizeof("[],") - 1;
+                for (int j = 0; j < C; j++) {
+                    slength += snprintf(nullptr, 0, "%g,", d[j * R + i]);
+                }
             }
 
-            char *output = static_cast<char *>(malloc(length)), *outp = output;
+            char *output = static_cast<char *>(malloc(slength)), *outp = output;
             strcpy(outp, "Matrix["); outp += sizeof("Matrix[") - 1;
-            for (int i = 0; i < R; i++)
-            {
+            for (int i = 0; i < R; i++) {
                 strcpy(outp++, "[");
-                for (int j = 0; j < C; j++)
+                for (int j = 0; j < C; j++) {
                     outp += sprintf(outp, "%g%s", d[j * R + i], (j == C - 1) ? "" : ",");
+                }
                 strcpy(outp, (i == R - 1) ? "]]" : "],"); outp += 2;
             }
 
@@ -477,18 +485,19 @@ template<int R, int C, typename T> class mat
 
 #ifdef __MINGW32__
             throw std::runtime_error("Windows cannot into popen()");
-            FILE *p;
+            FILE *pfp = nullptr;
 #else
-            FILE *p = popen(cmd, "r");
+            FILE *pfp = popen(cmd, "r");
 #endif
 
             char *result = static_cast<char *>(malloc(Rr * Cr * 64));
-            fread(result, 1, Rr * Cr * 64, p);
+            fread(result, 1, Rr * Cr * 64, pfp);
 
-            if (!feof(p))
+            if (!feof(pfp)) {
                 throw std::runtime_error("Could not retrieve result matrix from ruby: Too much data");
+            }
 
-            fclose(p);
+            fclose(pfp);
 
             mat<Rr, Cr, Tr> ret(result);
             free(result);
@@ -547,11 +556,12 @@ mat<R, C, _double_default(T)> mat<R, C, T>::svd_Sigma(void) const
 {
     static_assert(R == C, "svd_Sigma() is defined for square matrices only");
 
-    auto mat = (*this * this->transposed()).eigenvalue_matrix();
-    for (int i = 0; i < C; i++)
-        mat.d[i * R + i] = std::sqrt(mat.d[i * R + i]);
+    auto evmat = (*this * this->transposed()).eigenvalue_matrix();
+    for (int i = 0; i < C; i++) {
+        evmat.d[i * R + i] = std::sqrt(evmat.d[i * R + i]);
+    }
 
-    return mat;
+    return evmat;
 }
 
 

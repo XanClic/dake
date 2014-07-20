@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS = -O3 -Wall -Wextra -std=c++11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY
+CXXFLAGS = -O3 -Wall -Wextra -Wshadow -std=c++11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY
 AR = ar rcs
 
 OBJECTS = $(patsubst %.cpp,%.o,$(shell find -name '*.cpp' -and -not -path './examples/*'))

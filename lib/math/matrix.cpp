@@ -115,8 +115,7 @@ static void mult_mat4(float *d, const float *s1, const float *s2)
 #else
     float tmp[sizeof(float) * 16];
 
-    if (d == s1)
-    {
+    if (d == s1) {
         memcpy(tmp, s1, sizeof(tmp));
         s1 = tmp;
     }
@@ -145,8 +144,7 @@ static void mult_mat3(float *d, const float *s1, const float *s2)
 {
     float tmp[sizeof(float) * 9];
 
-    if (d == s1)
-    {
+    if (d == s1) {
         memcpy(tmp, s1, sizeof(tmp));
         s1 = tmp;
     }
@@ -167,8 +165,7 @@ static void mult_mat2(float *d, const float *s1, const float *s2)
 {
     float tmp[sizeof(float) * 4];
 
-    if (d == s1)
-    {
+    if (d == s1) {
         memcpy(tmp, s1, sizeof(tmp));
         s1 = tmp;
     }
@@ -265,42 +262,43 @@ template<> mat4 mat4::translated(const vec3 &vec) const
 
 template<> mat4 &mat4::rotate(float angle, const vec3 &axis)
 {
-    if (!angle)
+    if (!angle) {
         return *this;
+    }
 
-    float x = axis.x(), y = axis.y(), z = axis.z();
+    float xr = axis.x(), yr = axis.y(), zr = axis.z();
     // this should actually be exact
-    float rlen = 1.f / sqrtf(x * x + y * y + z * z);
+    float rlen = 1.f / sqrtf(xr * xr + yr * yr + zr * zr);
 
-    x *= rlen;
-    y *= rlen;
-    z *= rlen;
+    xr *= rlen;
+    yr *= rlen;
+    zr *= rlen;
 
-    float s = sinf(angle);
-    float c = cosf(angle);
-    float omc = 1.f - c;
+    float sa = std::sin(angle);
+    float ca = std::cos(angle);
+    float omc = 1.f - ca;
 
 #ifdef X64_ASSEMBLY
     float rm[16] = {
-        x * x * omc +     c, x * y * omc + z * s, x * z * omc - y * s, 0.f,
-        y * x * omc - z * s, y * y * omc +     c, y * z * omc + x * s, 0.f,
-        z * x * omc + y * s, z * y * omc - x * s, z * z * omc +     c, 0.f,
-                        0.f,                 0.f,                 0.f, 1.f
+        xr * xr * omc +      ca, xr * yr * omc + zr * sa, xr * zr * omc - yr * sa, 0.f,
+        yr * xr * omc - zr * sa, yr * yr * omc +      ca, yr * zr * omc + xr * sa, 0.f,
+        zr * xr * omc + yr * sa, zr * yr * omc - xr * sa, zr * zr * omc +      ca, 0.f,
+                            0.f,                     0.f,                     0.f, 1.f
     };
 
     *this *= *reinterpret_cast<mat4 *>(rm);
 #else
-    float _00 = x * x * omc +     c;
-    float _01 = x * y * omc - z * s;
-    float _02 = x * z * omc + y * s;
+    float _00 = xr * xr * omc +      ca;
+    float _01 = xr * yr * omc - zr * sa;
+    float _02 = xr * zr * omc + yr * sa;
 
-    float _10 = y * x * omc + z * s;
-    float _11 = y * y * omc +     c;
-    float _12 = y * z * omc - x * s;
+    float _10 = yr * xr * omc + zr * sa;
+    float _11 = yr * yr * omc +      ca;
+    float _12 = yr * zr * omc - xr * sa;
 
-    float _20 = z * x * omc - y * s;
-    float _21 = z * y * omc + x * s;
-    float _22 = z * z * omc +     c;
+    float _20 = zr * xr * omc - yr * sa;
+    float _21 = zr * yr * omc + xr * sa;
+    float _22 = zr * zr * omc +      ca;
 
     float n00 = d[ 0] * _00 + d[ 4] * _10 + d[ 8] * _20;
     float n01 = d[ 1] * _00 + d[ 5] * _10 + d[ 9] * _20;
@@ -327,42 +325,43 @@ template<> mat4 &mat4::rotate(float angle, const vec3 &axis)
 
 template<> mat4 mat4::rotated(float angle, const vec3 &axis) const
 {
-    if (!angle)
+    if (!angle) {
         return mat4(*this);
+    }
 
-    float x = axis.x(), y = axis.y(), z = axis.z();
+    float xr = axis.x(), yr = axis.y(), zr = axis.z();
     // this should actually be exact
-    float rlen = 1.f / sqrtf(x * x + y * y + z * z);
+    float rlen = 1.f / sqrtf(xr * xr + yr * yr + zr * zr);
 
-    x *= rlen;
-    y *= rlen;
-    z *= rlen;
+    xr *= rlen;
+    yr *= rlen;
+    zr *= rlen;
 
-    float s = sinf(angle);
-    float c = cosf(angle);
-    float omc = 1.f - c;
+    float sa = std::sin(angle);
+    float ca = std::cos(angle);
+    float omc = 1.f - ca;
 
 #ifdef X64_ASSEMBLY
     float rm[16] = {
-        x * x * omc +     c, x * y * omc + z * s, x * z * omc - y * s, 0.f,
-        y * x * omc - z * s, y * y * omc +     c, y * z * omc + x * s, 0.f,
-        z * x * omc + y * s, z * y * omc - x * s, z * z * omc +     c, 0.f,
-                        0.f,                 0.f,                 0.f, 1.f
+        xr * xr * omc +      ca, xr * yr * omc + zr * sa, xr * zr * omc - yr * sa, 0.f,
+        yr * xr * omc - zr * sa, yr * yr * omc +      ca, yr * zr * omc + xr * sa, 0.f,
+        zr * xr * omc + yr * sa, zr * yr * omc - xr * sa, zr * zr * omc +      ca, 0.f,
+                            0.f,                     0.f,                     0.f, 1.f
     };
 
     return *this * *reinterpret_cast<mat4 *>(rm);
 #else
-    float _00 = x * x * omc +     c;
-    float _01 = x * y * omc - z * s;
-    float _02 = x * z * omc + y * s;
+    float _00 = xr * xr * omc +      ca;
+    float _01 = xr * yr * omc - zr * sa;
+    float _02 = xr * zr * omc + yr * sa;
 
-    float _10 = y * x * omc + z * s;
-    float _11 = y * y * omc +     c;
-    float _12 = y * z * omc - x * s;
+    float _10 = yr * xr * omc + zr * sa;
+    float _11 = yr * yr * omc +      ca;
+    float _12 = yr * zr * omc - xr * sa;
 
-    float _20 = z * x * omc - y * s;
-    float _21 = z * y * omc + x * s;
-    float _22 = z * z * omc +     c;
+    float _20 = zr * xr * omc - yr * sa;
+    float _21 = zr * yr * omc + xr * sa;
+    float _22 = zr * zr * omc +      ca;
 
     float n00 = d[ 0] * _00 + d[ 4] * _10 + d[ 8] * _20;
     float n01 = d[ 1] * _00 + d[ 5] * _10 + d[ 9] * _20;

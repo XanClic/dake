@@ -2,6 +2,7 @@
 #define DAKE__GL__SHADER_HPP
 
 #include <cassert>
+#include <initializer_list>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -21,23 +22,27 @@ class shader
         GLuint id;
         GLint t;
 
+        bool compiled = false;
+        std::string name = std::string("(unnamed)");
+
         friend class program;
 
 
     public:
-        enum type
-        {
+        enum type {
             VERTEX   = GL_VERTEX_SHADER,
             FRAGMENT = GL_FRAGMENT_SHADER,
             GEOMETRY = GL_GEOMETRY_SHADER
         };
 
         shader(type t);
+        shader(type t, const char *src_file);
         ~shader(void);
 
         void load(const char *file);
-        void source(const char *source);
+        void source(const char *src);
 
+        // Always returns true
         bool compile(void);
 };
 
@@ -54,14 +59,18 @@ class program
     private:
         GLuint id;
         std::unordered_map<std::string, GLint> uniform_locations;
+        std::string name = std::string("");
+
+        bool linked = false;
 
 
     public:
         program(void);
         ~program(void);
 
-        void operator<<(const shader &sh);
+        void operator<<(shader &sh);
 
+        // Always returns true
         bool link(void);
         void use(void);
 
@@ -69,6 +78,7 @@ class program
 
         GLuint attrib(const char *identifier);
         void bind_attrib(const char *identifier, int location);
+        GLuint frag(const char *identifier);
         void bind_frag(const char *identifier, int location);
 
         template<typename T> dake::gl::uniform<T> uniform(const std::string &identifier)
@@ -99,16 +109,18 @@ template<typename T> class uniform
 
     public:
         uniform(void) { id = -1; prg = nullptr; }
-        uniform(GLint id, program *prg)
+        uniform(GLint uid, program *uprg)
         {
-            assert(id >= 0);
-            this->id = id;
-            this->prg = prg;
+            assert(uid >= 0);
+            id = uid;
+            prg = uprg;
         }
 
         uniform<T> &operator=(const T &value)
         {
-            if ((id < 0) || !prg) throw std::invalid_argument("Uniform has not been looked up yet");
+            if ((id < 0) || !prg) {
+                throw std::invalid_argument("Uniform has not been looked up yet");
+            }
             prg->use();
             assign(value);
             return *this;

@@ -62,8 +62,8 @@ class range
         T s, e;
 
     public:
-        range(const T &start, const T &end):
-            s(start), e(end)
+        range(const T &st, const T &ed):
+            s(st), e(ed)
         { ++e; }
 
         range_iterator<T> begin(void) const

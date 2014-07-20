@@ -48,22 +48,22 @@ void dake::gl::vertex_array::set_elements(size_t count)
 }
 
 
-dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint id)
+dake::gl::vertex_attrib *dake::gl::vertex_array::attrib(GLuint aid)
 {
-    assert(id < (sizeof(uintmax_t) * 8));
+    assert(aid < (sizeof(uintmax_t) * 8));
 
     for (std::list<vertex_attrib *>::iterator i = attribs.begin(); i != attribs.end(); ++i) {
-        if ((*i)->attrib == id) {
+        if ((*i)->attrib == aid) {
             return *i;
         }
     }
 
     bind();
 
-    dake::gl::vertex_attrib *va = new dake::gl::vertex_attrib(this, id);
+    dake::gl::vertex_attrib *va = new dake::gl::vertex_attrib(this, aid);
     attribs.push_back(va);
 
-    glEnableVertexAttribArray(id);
+    glEnableVertexAttribArray(aid);
 
     // FIXME, somehow
     dake::gl::cur_va = nullptr;
