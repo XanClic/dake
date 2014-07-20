@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "dake/gl/find_resource.hpp"
 #include "dake/gl/obj.hpp"
 #include "dake/gl/vertex_array.hpp"
 #include "dake/gl/vertex_attrib.hpp"
@@ -27,6 +28,8 @@ static dake::gl::obj_material default_mat = {
 
 dake::gl::obj dake::gl::load_obj(const char *filename)
 {
+    filename = dake::gl::find_resource_filename(filename).c_str();
+
     std::ifstream file(filename);
     if (!file.is_open()) {
         // let's just hope errno is set
