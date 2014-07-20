@@ -99,6 +99,10 @@ class program
         {
             check_valid();
 
+            if (!linked) {
+                link();
+            }
+
             auto pos = uniform_locations.find(identifier);
             if (pos != uniform_locations.end()) {
                 return dake::gl::uniform<T>(pos->second, this);
