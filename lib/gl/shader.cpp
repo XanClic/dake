@@ -4,6 +4,7 @@
 #include <string>
 
 #include <dake/math/matrix.hpp>
+#include <dake/gl/find_resource.hpp>
 #include <dake/gl/shader.hpp>
 #include <dake/gl/texture.hpp>
 
@@ -92,7 +93,7 @@ void dake::gl::shader::load(const char *file)
 {
     check_valid();
 
-    FILE *fp = fopen(file, "rb");
+    FILE *fp = fopen(dake::gl::find_resource_filename(file).c_str(), "rb");
     if (!fp) {
         throw std::invalid_argument("Could not open the given shader file");
     }

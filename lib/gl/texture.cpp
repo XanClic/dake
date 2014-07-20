@@ -9,6 +9,7 @@
 
 #include <png.h>
 
+#include <dake/gl/find_resource.hpp>
 #include <dake/gl/gl.hpp>
 #include <dake/gl/texture.hpp>
 
@@ -153,7 +154,7 @@ dake::gl::texture::texture(const std::string &name):
     tmu_index(0),
     fname(name)
 {
-    FILE *fp = fopen(name.c_str(), "rb");
+    FILE *fp = fopen(dake::gl::find_resource_filename(name).c_str(), "rb");
     if (!fp) {
         throw std::runtime_error("Could not load texture from " + name + ": " + strerror(errno));
     }
