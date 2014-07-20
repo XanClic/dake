@@ -28,9 +28,9 @@ static dake::gl::obj_material default_mat = {
 
 dake::gl::obj dake::gl::load_obj(const char *filename)
 {
-    filename = dake::gl::find_resource_filename(filename).c_str();
+    std::string fname_str = dake::gl::find_resource_filename(filename).c_str();
 
-    std::ifstream file(filename);
+    std::ifstream file(fname_str);
     if (!file.is_open()) {
         // let's just hope errno is set
         throw std::invalid_argument(std::string("Could not open OBJ file: ") + strerror(errno));
@@ -47,9 +47,8 @@ dake::gl::obj dake::gl::load_obj(const char *filename)
     std::vector<dake::gl::obj_material> materials;
 
 
-    char *filename_copy = strdup(filename);
-    std::string obj_dirname(dirname(filename_copy));
-    free(filename_copy);
+    std::string fname_copy = fname_str;
+    std::string obj_dirname(dirname(const_cast<char *>(fname_copy.c_str()))); // no risk no fun
 
 
     std::string str_line;
