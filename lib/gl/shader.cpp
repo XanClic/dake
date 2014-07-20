@@ -26,21 +26,17 @@ dake::gl::shader::shader(GLint tp, GLuint glid):
 {}
 
 
-dake::gl::shader::shader(dake::gl::shader::type tp):
+dake::gl::shader::shader(dake::gl::shader::type tp, const char *src_file):
     t(tp)
 {
     id = glCreateShader(tp);
-
     if (!id) {
         throw std::runtime_error("Could not create shader");
     }
-}
 
-
-dake::gl::shader::shader(dake::gl::shader::type tp, const char *src_file):
-    shader(tp)
-{
-    load(src_file);
+    if (src_file) {
+        load(src_file);
+    }
 }
 
 
@@ -63,6 +59,24 @@ dake::gl::shader::~shader(void)
     if (id) {
         glDeleteShader(id);
     }
+}
+
+
+dake::gl::shader dake::gl::shader::vert(const char *src_file)
+{
+    return shader(VERTEX, src_file);
+}
+
+
+dake::gl::shader dake::gl::shader::geom(const char *src_file)
+{
+    return shader(GEOMETRY, src_file);
+}
+
+
+dake::gl::shader dake::gl::shader::frag(const char *src_file)
+{
+    return shader(FRAGMENT, src_file);
 }
 
 

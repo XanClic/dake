@@ -38,11 +38,14 @@ class shader
             GEOMETRY = GL_GEOMETRY_SHADER
         };
 
-        shader(type t);
-        shader(type t, const char *src_file);
+        shader(type t, const char *src_file = nullptr);
         shader(const shader &sh) = delete;
         shader(shader &&sh);
         ~shader(void);
+
+        static shader vert(const char *src_file = nullptr);
+        static shader geom(const char *src_file = nullptr);
+        static shader frag(const char *src_file = nullptr);
 
         void load(const char *file);
         void source(const char *src);
