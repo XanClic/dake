@@ -229,15 +229,19 @@ template<> mat4 &mat4::translate(const vec3 &vec)
             "pshufd $0x00,%0,%0;"
             "pshufd $0x00,%1,%1;"
             "pshufd $0x00,%2,%2;"
-            "mulps   0(%3),%0;"
-            "mulps  16(%3),%1;"
-            "mulps  32(%3),%2;"
+            "movups  0(%3),%%xmm0;"
+            "movups 16(%3),%%xmm1;"
+            "movups 32(%3),%%xmm2;"
+            "movups 48(%3),%%xmm3;"
+            "mulps  %%xmm0,%0;"
+            "mulps  %%xmm1,%1;"
+            "mulps  %%xmm2,%2;"
             "addps  %1,%0;"
             "addps  %2,%0;"
-            "addps  48(%3),%0;"
+            "addps  %%xmm3,%0;"
             "movups %0,48(%3)"
             :: "x"(vec.x()), "x"(vec.y()), "x"(vec.z()), "r"(&d[0])
-            : "memory"
+            : "xmm0", "xmm1", "xmm2", "xmm3", "memory"
     );
 #else
     d[12] += vec.x() * d[ 0] + vec.y() * d[ 4] + vec.z() * d[ 8];
@@ -392,14 +396,17 @@ template<> mat4 &mat4::scale(const vec3 &fac)
             "pshufd $0x00,%0,%0;"
             "pshufd $0x00,%1,%1;"
             "pshufd $0x00,%2,%2;"
-            "mulps   0(%3),%0;"
-            "mulps  16(%3),%1;"
-            "mulps  32(%3),%2;"
+            "movups  0(%3),%%xmm0;"
+            "movups 16(%3),%%xmm1;"
+            "movups 32(%3),%%xmm2;"
+            "mulps  %%xmm0,%0;"
+            "mulps  %%xmm1,%1;"
+            "mulps  %%xmm2,%2;"
             "movups %0, 0(%3);"
             "movups %1,16(%3);"
             "movups %2,32(%3)"
             :: "x"(fac.x()), "x"(fac.y()), "x"(fac.z()), "r"(&d[0])
-            : "memory"
+            : "xmm0", "xmm1", "xmm2", "memory"
     );
 #else
     d[0] *= fac.x(); d[4] *= fac.y(); d[ 8] *= fac.z();
