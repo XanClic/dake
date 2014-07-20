@@ -79,6 +79,11 @@ class program
         program(std::initializer_list<shader> shaders);
         program(const program &prg) = delete;
         program(program &&prg);
+
+        template<class...S>
+        program(S &... shaders): program()
+        { for (shader &sh: {shaders...}) *this << sh; }
+
         ~program(void);
 
         void operator<<(shader &sh);
