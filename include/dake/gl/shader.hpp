@@ -26,6 +26,7 @@ class shader
         std::string name = std::string("(unnamed)");
 
         shader(GLint t, GLuint id);
+        void check_valid(void) const;
 
         friend class program;
 
@@ -40,6 +41,7 @@ class shader
         shader(type t);
         shader(type t, const char *src_file);
         shader(const shader &sh) = delete;
+        shader(shader &&sh);
         ~shader(void);
 
         void load(const char *file);
@@ -66,11 +68,14 @@ class program
 
         bool linked = false;
 
+        void check_valid(void) const;
+
 
     public:
         program(void);
         program(std::initializer_list<shader> shaders);
         program(const program &prg) = delete;
+        program(program &&prg);
         ~program(void);
 
         void operator<<(shader &sh);
@@ -89,6 +94,8 @@ class program
 
         template<typename T> dake::gl::uniform<T> uniform(const std::string &identifier)
         {
+            check_valid();
+
             auto pos = uniform_locations.find(identifier);
             if (pos != uniform_locations.end()) {
                 return dake::gl::uniform<T>(pos->second, this);

@@ -44,6 +44,20 @@ dake::gl::shader::shader(dake::gl::shader::type tp, const char *src_file):
 }
 
 
+dake::gl::shader::shader(dake::gl::shader &&sh)
+{
+    id = sh.id;
+    t = sh.t;
+    compiled = sh.compiled;
+    name = std::move(sh.name);
+
+    sh.t = 0;
+    sh.id = 0;
+    sh.compiled = false;
+    sh.name = "unnamed";
+}
+
+
 dake::gl::shader::~shader(void)
 {
     if (id) {
@@ -52,8 +66,18 @@ dake::gl::shader::~shader(void)
 }
 
 
+void dake::gl::shader::check_valid(void) const
+{
+    if (!id) {
+        throw std::runtime_error("Shader " + name + " is not valid; may have been move'd");
+    }
+}
+
+
 void dake::gl::shader::load(const char *file)
 {
+    check_valid();
+
     FILE *fp = fopen(file, "rb");
     if (!fp) {
         throw std::invalid_argument("Could not open the given shader file");
@@ -78,7 +102,9 @@ void dake::gl::shader::load(const char *file)
 
 void dake::gl::shader::source(const char *src)
 {
-    name = std::string("unknown");
+    check_valid();
+
+    name = "unknown";
 
     glShaderSource(id, 1, const_cast<const GLchar **>(&src), nullptr);
 }
@@ -101,6 +127,8 @@ static const char *shader_type_string(GLint t)
 
 bool dake::gl::shader::compile(void)
 {
+    check_valid();
+
     glCompileShader(id);
 
     GLint status;
@@ -148,14 +176,37 @@ dake::gl::program::program(std::initializer_list<shader> shaders):
 }
 
 
+dake::gl::program::program(program &&prg)
+{
+    id = prg.id;
+    uniform_locations = std::move(prg.uniform_locations);
+    name = std::move(prg.name);
+
+    prg.id = 0;
+    prg.name = "";
+}
+
+
 dake::gl::program::~program(void)
 {
-    glDeleteProgram(id);
+    if (id) {
+        glDeleteProgram(id);
+    }
+}
+
+
+void dake::gl::program::check_valid(void) const
+{
+    if (!id) {
+        throw std::runtime_error("Program (from shaders " + name + ") is not valid; may have been move'd");
+    }
 }
 
 
 void dake::gl::program::operator<<(dake::gl::shader &sh)
 {
+    check_valid();
+
     if (!sh.compiled) {
         sh.compile();
     }
@@ -172,6 +223,8 @@ void dake::gl::program::operator<<(dake::gl::shader &sh)
 
 void dake::gl::program::operator<<(dake::gl::shader &&sh)
 {
+    check_valid();
+
     shader sh_moved(sh.t, sh.id);
 
     sh.id = 0;
@@ -183,6 +236,8 @@ void dake::gl::program::operator<<(dake::gl::shader &&sh)
 
 bool dake::gl::program::link(void)
 {
+    check_valid();
+
     glLinkProgram(id);
 
     GLint status;
@@ -213,6 +268,8 @@ bool dake::gl::program::link(void)
 
 void dake::gl::program::use(void)
 {
+    check_valid();
+
     if (dake::gl::active_program == this) {
         return;
     }
@@ -228,6 +285,8 @@ void dake::gl::program::use(void)
 
 GLuint dake::gl::program::attrib(const char *identifier)
 {
+    check_valid();
+
     if (!linked) {
         link();
     }
@@ -237,12 +296,15 @@ GLuint dake::gl::program::attrib(const char *identifier)
 
 void dake::gl::program::bind_attrib(const char *identifier, int location)
 {
+    check_valid();
     glBindAttribLocation(id, location, identifier);
 }
 
 
 GLuint dake::gl::program::frag(const char *identifier)
 {
+    check_valid();
+
     if (!linked) {
         link();
     }
@@ -252,6 +314,7 @@ GLuint dake::gl::program::frag(const char *identifier)
 
 void dake::gl::program::bind_frag(const char *identifier, int location)
 {
+    check_valid();
     glBindFragDataLocation(id, location, identifier);
 }
 
