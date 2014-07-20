@@ -47,15 +47,17 @@ void dake::gl::vertex_attrib::bind(void)
 }
 
 
-void dake::gl::vertex_attrib::reuse_buffer(vertex_attrib *va)
+void dake::gl::vertex_attrib::reuse_buffer(vertex_attrib *ova)
 {
-    if (va == this)
+    if (ova == this) {
         throw std::invalid_argument("Cannot reuse own buffer");
+    }
 
-    if (!buffer_reused)
+    if (!buffer_reused) {
         glDeleteBuffers(1, &buffer);
+    }
 
-    buffer = va->buffer;
+    buffer = ova->buffer;
     buffer_reused = true;
 }
 

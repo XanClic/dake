@@ -17,7 +17,7 @@ void dake::gl::texture::raw_init(void)
 {
     glGenTextures(1, &tex_id);
 
-    glActiveTexture(GL_TEXTURE0 + tmu);
+    glActiveTexture(GL_TEXTURE0 + tmu_index);
     glEnable(GL_TEXTURE_2D);
     bind();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -150,7 +150,7 @@ image_format formats[] = {
 
 
 dake::gl::texture::texture(const std::string &name):
-    tmu(0),
+    tmu_index(0),
     fname(name)
 {
     FILE *fp = fopen(name.c_str(), "rb");
@@ -198,7 +198,7 @@ dake::gl::texture::texture(const std::string &name):
 
 
 dake::gl::texture::texture(void):
-    tmu(0),
+    tmu_index(0),
     fname("[anon]")
 {
     raw_init();
@@ -213,23 +213,23 @@ dake::gl::texture::~texture(void)
 
 void dake::gl::texture::bind(void) const
 {
-    glActiveTexture(GL_TEXTURE0 + tmu);
+    glActiveTexture(GL_TEXTURE0 + tmu_index);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 }
 
 
-void dake::gl::texture::format(GLenum format, int w, int h, GLenum read_format, GLenum read_data_format)
+void dake::gl::texture::format(GLenum fmt, int w, int h, GLenum read_format, GLenum read_data_format)
 {
     bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, read_format, read_data_format, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
 }
 
 
-void dake::gl::texture::filter(GLenum filter)
+void dake::gl::texture::filter(GLenum f)
 {
     bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
 }
 
 

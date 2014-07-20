@@ -17,7 +17,7 @@ class texture
 {
     private:
         GLuint tex_id;
-        int tmu;
+        int tmu_index;
         std::string fname;
 
         void raw_init(void);
@@ -33,11 +33,15 @@ class texture
 
         void format(GLenum format, int w, int h, GLenum read_format = GL_RGB, GLenum read_data_format = GL_UNSIGNED_BYTE);
         void filter(GLenum filter);
-        void set_tmu(int tmu) { this->tmu = tmu; }
+        void set_tmu(int tmui) { tmu_index = tmui; }
 
         const std::string &get_fname(void) const { return fname; }
         GLuint get_glid(void) const { return tex_id; }
-        int get_tmu(void) const { return tmu; }
+        int get_tmu(void) const { return tmu_index; }
+
+        int &tmu(void) { return tmu_index; }
+        int tmu(void) const { return tmu_index; }
+        GLuint glid(void) const { return tex_id; }
 };
 
 
@@ -53,7 +57,7 @@ class texture_manager
 
         static texture_manager &instance(void)
         {
-            static texture_manager *texman = NULL;
+            static texture_manager *texman = nullptr;
             if (!texman) texman = new texture_manager;
             return *texman;
         }
