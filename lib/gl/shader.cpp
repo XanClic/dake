@@ -21,6 +21,11 @@ program *active_program;
 }
 
 
+dake::gl::shader::shader(GLint tp, GLuint glid):
+    id(glid), t(tp)
+{}
+
+
 dake::gl::shader::shader(dake::gl::shader::type tp):
     t(tp)
 {
@@ -41,7 +46,9 @@ dake::gl::shader::shader(dake::gl::shader::type tp, const char *src_file):
 
 dake::gl::shader::~shader(void)
 {
-    glDeleteShader(id);
+    if (id) {
+        glDeleteShader(id);
+    }
 }
 
 
@@ -107,7 +114,7 @@ bool dake::gl::shader::compile(void)
     glGetShaderiv(id, GL_INFO_LOG_LENGTH, &illen);
 
     if (illen <= 1) {
-        throw std::string("Error compiling " + std::string(shader_type_string(t)) + " shader " + name + ": Reason unknown");
+        throw std::runtime_error("Error compiling " + std::string(shader_type_string(t)) + " shader " + name + ": Reason unknown");
     } else {
         char *msg = new char[illen + 1];
 
@@ -117,7 +124,7 @@ bool dake::gl::shader::compile(void)
         std::string msg_str(msg);
         delete[] msg;
 
-        throw std::string("Error compiling " + std::string(shader_type_string(t)) + " shader " + name + ": " + msg_str);
+        throw std::runtime_error("Error compiling " + std::string(shader_type_string(t)) + " shader " + name + ": " + msg_str);
     }
 
     return false;
@@ -127,6 +134,17 @@ bool dake::gl::shader::compile(void)
 dake::gl::program::program(void)
 {
     id = glCreateProgram();
+}
+
+
+dake::gl::program::program(std::initializer_list<shader> shaders):
+    program()
+{
+    for (const shader &sh: shaders) {
+        // Let's just pray to god this works
+        shader sh_copy(sh.t, sh.id);
+        *this << sh_copy;
+    }
 }
 
 
@@ -149,6 +167,17 @@ void dake::gl::program::operator<<(dake::gl::shader &sh)
     }
 
     glAttachShader(id, sh.id);
+}
+
+
+void dake::gl::program::operator<<(dake::gl::shader &&sh)
+{
+    shader sh_moved(sh.t, sh.id);
+
+    sh.id = 0;
+    sh.compiled = false;
+
+    *this << sh_moved;
 }
 
 

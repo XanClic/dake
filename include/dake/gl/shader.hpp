@@ -25,6 +25,8 @@ class shader
         bool compiled = false;
         std::string name = std::string("(unnamed)");
 
+        shader(GLint t, GLuint id);
+
         friend class program;
 
 
@@ -66,9 +68,11 @@ class program
 
     public:
         program(void);
+        program(std::initializer_list<shader> shaders);
         ~program(void);
 
         void operator<<(shader &sh);
+        void operator<<(shader &&sh);
 
         // Always returns true
         bool link(void);
