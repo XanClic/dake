@@ -39,6 +39,7 @@ class shader
 
         shader(type t);
         shader(type t, const char *src_file);
+        shader(const shader &sh) = delete;
         ~shader(void);
 
         void load(const char *file);
@@ -69,6 +70,7 @@ class program
     public:
         program(void);
         program(std::initializer_list<shader> shaders);
+        program(const program &prg) = delete;
         ~program(void);
 
         void operator<<(shader &sh);
