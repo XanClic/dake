@@ -24,6 +24,7 @@ class shader
 
         bool compiled = false;
         std::string name = std::string("(unnamed)");
+        bool is_copy = false;
 
         shader(GLint t, GLuint id);
         void check_valid(void) const;
