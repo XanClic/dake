@@ -23,7 +23,7 @@ program *active_program;
 
 
 dake::gl::shader::shader(GLint tp, GLuint glid):
-    id(glid), t(tp)
+    id(glid), t(tp), is_copy(true)
 {}
 
 
@@ -57,7 +57,7 @@ dake::gl::shader::shader(dake::gl::shader &&sh)
 
 dake::gl::shader::~shader(void)
 {
-    if (id) {
+    if (id && !is_copy) {
         glDeleteShader(id);
     }
 }
