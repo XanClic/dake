@@ -25,7 +25,7 @@ class range_iterator
         typedef T difference_type;
         typedef T value_type;
         typedef T *pointer;
-        typedef T &reference;
+        typedef const T &reference;
         typedef std::bidirectional_iterator_tag iterator_category;
 
 
@@ -37,6 +37,9 @@ class range_iterator
 
         bool operator!=(const range_iterator &ri)
         { return ri.pos != pos; }
+
+        bool operator==(const range_iterator &ri)
+        { return ri.pos == pos; }
 
         range_iterator &operator++(void)
         { ++pos; return *this; }
@@ -62,6 +65,15 @@ class range
         T s, e;
 
     public:
+        typedef T value_type;
+        typedef const T &reference;
+        typedef const T &const_reference;
+        typedef range_iterator<T> iterator;
+        typedef range_iterator<T> const_iterator;
+        typedef T difference_type;
+        typedef std::size_t size_type;
+
+
         range(const T &st, const T &ed):
             s(st), e(ed)
         { ++e; }
