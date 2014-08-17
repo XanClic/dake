@@ -11,6 +11,11 @@ namespace dake
 namespace gl
 {
 
+class framebuffer;
+
+extern framebuffer *current_fb;
+
+
 class framebuffer
 {
     private:
@@ -35,10 +40,12 @@ class framebuffer
 
         void bind(void);
 
+        static framebuffer *current(void) { return current_fb; }
+
         void mask(int i);
         void unmask(int i);
 
-        static void unbind(void) { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); glDrawBuffer(GL_BACK); }
+        static void unbind(void) { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); glDrawBuffer(GL_BACK); current_fb = nullptr; }
 };
 
 }
