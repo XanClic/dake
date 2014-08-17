@@ -1,6 +1,19 @@
 #include <dake/gl/framebuffer.hpp>
 
 
+namespace dake
+{
+
+namespace gl
+{
+
+dake::gl::framebuffer *current_fb = nullptr;
+
+}
+
+}
+
+
 dake::gl::framebuffer::framebuffer(int color_attachments, GLenum format):
     ca_count(color_attachments)
 {
@@ -64,6 +77,8 @@ void dake::gl::framebuffer::bind(void)
 {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
     glDrawBuffers(ca_count, draw_buffers);
+
+    current_fb = this;
 }
 
 
