@@ -5,11 +5,8 @@
 extern "C" {
 #include <GL/glew.h>
 }
-
-namespace dake { namespace gl { static inline bool glext_init(void) { return glewInit() == GLEW_OK; } } }
 #else
 #define GL_GLEXT_PROTOTYPES
-namespace dake { namespace gl { static inline bool glext_init(void) { return true; } } }
 #endif
 
 extern "C" {
@@ -21,5 +18,44 @@ extern "C" {
 #include <GL/glext.h>
 }
 #endif
+
+
+#include <string>
+#include <vector>
+
+
+namespace dake
+{
+
+namespace gl
+{
+
+class glext_info {
+    private:
+        bool initialized = false;
+        std::vector<std::string> exts;
+        bool bindless_txt = false;
+
+
+    public:
+        bool init(void);
+
+        const std::vector<std::string> &extensions(void) const
+        { return exts; }
+
+        bool has_extension(const char *name) const;
+        bool has_extension(const std::string &name) const;
+
+        bool has_bindless_textures(void) const
+        { return bindless_txt; }
+};
+
+extern glext_info glext;
+
+static inline bool glext_init(void) { return glext.init(); }
+
+}
+
+}
 
 #endif
