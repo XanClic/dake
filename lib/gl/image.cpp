@@ -1,0 +1,220 @@
+#include <cerrno>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+
+#include <png.h>
+
+#include <dake/gl/find_resource.hpp>
+#include <dake/gl/gl.hpp>
+#include <dake/gl/texture.hpp>
+
+
+bool test_png(const void *buffer, size_t length)
+{
+    return png_sig_cmp(static_cast<png_const_bytep>(buffer), 0, length < 8 ? length : 8) == 0;
+}
+
+
+void *load_png(const void *buffer, size_t length, int *width, int *height, int *channels, dake::gl::image::channel_format *format)
+{
+    // lol longjmp
+
+    FILE *fp = fmemopen(const_cast<void *>(buffer), length, "rb");
+
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (!png_ptr) {
+        fclose(fp);
+        throw std::runtime_error("Could not create PNG read struct");
+    }
+
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        png_destroy_read_struct(&png_ptr, nullptr, nullptr);
+        fclose(fp);
+        throw std::runtime_error("Could not create PNG info struct");
+    }
+
+    png_infop info_end = png_create_info_struct(png_ptr);
+    if (!info_end) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+        fclose(fp);
+        throw std::runtime_error("Could not create PNG end info struct");
+    }
+
+    png_init_io(png_ptr, fp);
+
+    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, nullptr);
+
+    int depth, fmt;
+    uint32_t w, h;
+    png_get_IHDR(png_ptr, info_ptr, &w, &h, &depth, &fmt, nullptr, nullptr, nullptr);
+
+    *width = w;
+    *height = h;
+    *format = dake::gl::image::LINEAR_UINT8;
+
+    switch (fmt) {
+        case PNG_COLOR_TYPE_GRAY:       *channels = 1; break;
+        case PNG_COLOR_TYPE_GRAY_ALPHA: *channels = 2; break;
+        case PNG_COLOR_TYPE_PALETTE:
+        case PNG_COLOR_TYPE_RGB:        *channels = 3; break;
+        case PNG_COLOR_TYPE_RGB_ALPHA:  *channels = 4; break;
+        default:
+            png_destroy_read_struct(&png_ptr, &info_ptr, &info_end);
+            fclose(fp);
+            throw std::runtime_error("Unknown PNG color format");
+    }
+
+    png_bytep *rows = png_get_rows(png_ptr, info_ptr);
+
+    png_colorp palette;
+    int palette_entries = 0;
+    if (fmt == PNG_COLOR_TYPE_PALETTE) {
+        png_get_PLTE(png_ptr, info_ptr, &palette, &palette_entries);
+    }
+
+    uint8_t *output = new uint8_t[w * h * *channels];
+    uint32_t ofs = 0;
+    for (uint32_t y = 0; y < h; y++) {
+        if (fmt == PNG_COLOR_TYPE_PALETTE) {
+            uint32_t rofs = 0;
+            for (uint32_t x = 0; x < w; x++) {
+                output[ofs++] = palette[rows[y][rofs  ]].red;
+                output[ofs++] = palette[rows[y][rofs  ]].green;
+                output[ofs++] = palette[rows[y][rofs++]].blue;
+            }
+        } else {
+            memcpy(&output[ofs], rows[y], w * *channels);
+            ofs += w * *channels;
+        }
+    }
+
+    png_destroy_read_struct(&png_ptr, &info_ptr, &info_end);
+    fclose(fp);
+
+    return output;
+}
+
+
+struct image_format {
+    const char *name;
+
+    bool (*test)(const void *buffer, size_t length);
+    void *(*load)(const void *buffer, size_t length, int *width, int *height, int *channels, dake::gl::image::channel_format *fmt);
+};
+
+
+static const image_format formats[] = {
+    {
+        "png",
+        test_png,
+        load_png
+    },
+};
+
+
+dake::gl::image::image(const std::string &file)
+{
+    FILE *fp = fopen(dake::gl::find_resource_filename(file).c_str(), "rb");
+    if (!fp) {
+        throw std::runtime_error("Could not load image from " + file + ": " + strerror(errno));
+    }
+
+    fseek(fp, 0, SEEK_END);
+    size_t lof = ftell(fp);
+    rewind(fp);
+
+    void *buffer = malloc(lof);
+    fread(buffer, 1, lof, fp);
+
+    fclose(fp);
+
+    try {
+        load(buffer, lof, file);
+    } catch (...) {
+        free(buffer);
+        throw;
+    }
+
+    free(buffer);
+}
+
+
+dake::gl::image::image(const void *buffer, size_t length)
+{
+    char *name = new char[2 + sizeof(buffer) * 2 + 1];
+    snprintf(name, 2 + sizeof(buffer) * 2 + 1, "%p", buffer);
+
+    try {
+        load(buffer, length, name);
+    } catch (...) {
+        free(name);
+        throw;
+    }
+
+    free(name);
+}
+
+
+dake::gl::image::~image(void)
+{
+    free(d);
+}
+
+
+void dake::gl::image::load(const void *buffer, size_t length, const std::string &name)
+{
+    for (const image_format &f: formats) {
+        if (f.test(buffer, length)) {
+            try {
+                d = f.load(buffer, length, &w, &h, &cc, &fmt);
+            } catch (const std::exception &e) {
+                throw std::runtime_error("Could not load image from " + name + ": " + e.what());
+            }
+
+            return;
+        }
+    }
+
+    std::string format_list;
+
+    int format_count = static_cast<int>(sizeof(formats) / sizeof(formats[0]));
+    for (int i = 0; i < format_count; i++) {
+        format_list += formats[i].name;
+
+        if (i < format_count - 1) {
+            format_list += ", ";
+        }
+    }
+
+    throw std::runtime_error("Could not load texture from " + name + ": Unsupported format (supported formats: " + format_list + ")");
+}
+
+
+static const GLenum gl_formats[] = {
+    GL_RED,
+    GL_RG,
+    GL_RGB,
+    GL_RGBA
+};
+
+
+GLenum dake::gl::image::gl_format(void) const
+{
+    return gl_formats[cc - 1];
+}
+
+
+static const GLenum gl_types[] = {
+    GL_UNSIGNED_BYTE, // LINEAR_UINT8
+};
+
+
+GLenum dake::gl::image::gl_type(void) const
+{
+    return gl_types[fmt];
+}

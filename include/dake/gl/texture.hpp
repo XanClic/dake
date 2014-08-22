@@ -13,8 +13,36 @@ namespace dake
 namespace gl
 {
 
-class texture
-{
+class image {
+    public:
+        enum channel_format {
+            LINEAR_UINT8
+        };
+
+    private:
+        void *d = nullptr;
+        channel_format fmt;
+        int w, h, cc;
+
+        void load(const void *buffer, size_t length, const std::string &name);
+
+    public:
+        image(const std::string &file);
+        image(const void *buffer, size_t length);
+        ~image(void);
+
+        int width(void) const { return w; }
+        int height(void) const { return h; }
+        int channels(void) const { return cc; }
+        channel_format format(void) const { return fmt; }
+        const void *data(void) const { return d; }
+
+        GLenum gl_format(void) const;
+        GLenum gl_type(void) const;
+};
+
+
+class texture {
     private:
         GLuint tex_id;
         int tmu_index;
@@ -25,6 +53,7 @@ class texture
     public:
         texture(void);
         texture(const std::string &name);
+        texture(const image &img);
         ~texture(void);
 
         void bind(void) const;
