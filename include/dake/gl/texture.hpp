@@ -47,6 +47,8 @@ class texture {
         GLuint tex_id;
         int tmu_index;
         std::string fname;
+        bool bl = false, is_resident = false;
+        uint64_t bl_handle;
 
         void raw_init(void);
 
@@ -59,6 +61,12 @@ class texture {
         void bind(void) const;
 
         static void unbind(int tmu = 0) { glActiveTexture(GL_TEXTURE0 + tmu); glBindTexture(GL_TEXTURE_2D, 0); }
+
+        bool bindless(void) const { return bl; }
+        void make_bindless(bool resident = true);
+        uint64_t handle(void) const { return bl_handle; }
+        bool resident(void) const { return is_resident; }
+        void make_resident(bool state);
 
         void format(GLenum format, int w, int h, GLenum read_format = GL_RGB, GLenum read_data_format = GL_UNSIGNED_BYTE);
         void filter(GLenum filter);
