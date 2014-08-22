@@ -7,6 +7,7 @@
 #include <string>
 
 #include <png.h>
+#include <jpeglib.h>
 
 #include <dake/gl/find_resource.hpp>
 #include <dake/gl/gl.hpp>
@@ -24,6 +25,9 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
     // lol longjmp
 
     FILE *fp = fmemopen(const_cast<void *>(buffer), length, "rb");
+    if (!fp) {
+        throw std::runtime_error("Could not open PNG buffer for reading");
+    }
 
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (!png_ptr) {
@@ -100,6 +104,72 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
 }
 
 
+bool test_jpg(const void *buffer, size_t length)
+{
+    jpeg_decompress_struct cinfo;
+    jpeg_error_mgr jpg_err;
+    FILE *fp = fmemopen(const_cast<void *>(buffer), length, "rb");
+    if (!fp) {
+        return false;
+    }
+
+    cinfo.err = jpeg_std_error(&jpg_err);
+
+    jpeg_create_decompress(&cinfo);
+    jpeg_stdio_src(&cinfo, fp);
+
+    bool success = jpeg_read_header(&cinfo, true);
+
+    jpeg_destroy_decompress(&cinfo);
+    fclose(fp);
+
+    return success;
+}
+
+
+void *load_jpg(const void *buffer, size_t length, int *width, int *height, int *channels, dake::gl::image::channel_format *format)
+{
+    jpeg_decompress_struct cinfo;
+    jpeg_error_mgr jpg_err;
+    FILE *fp = fmemopen(const_cast<void *>(buffer), length, "rb");
+    if (!fp) {
+        throw std::runtime_error("Could not open JPEG buffer for reading");
+    }
+
+    cinfo.err = jpeg_std_error(&jpg_err);
+
+    jpeg_create_decompress(&cinfo);
+    jpeg_stdio_src(&cinfo, fp);
+
+    jpeg_read_header(&cinfo, true);
+    jpeg_start_decompress(&cinfo);
+
+    if ((cinfo.output_components < 1) || (cinfo.output_components > 4)) {
+        jpeg_destroy_decompress(&cinfo);
+        fclose(fp);
+        throw std::runtime_error("Invalid number of JPEG color channels");
+    }
+
+    *width    = cinfo.output_width;
+    *height   = cinfo.output_height;
+    *channels = cinfo.output_components;
+    *format   = dake::gl::image::LINEAR_UINT8;
+
+    uint8_t *output = new uint8_t[*width * *height * *channels];
+    uint8_t *target = output;
+    while (static_cast<int>(cinfo.output_scanline) < *height) {
+        jpeg_read_scanlines(&cinfo, &target, 1);
+        target += *width * *channels;
+    }
+
+    jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+    fclose(fp);
+
+    return output;
+}
+
+
 struct image_format {
     const char *name;
 
@@ -113,6 +183,12 @@ static const image_format formats[] = {
         "png",
         test_png,
         load_png
+    },
+
+    {
+        "jpg",
+        test_jpg,
+        load_jpg
     },
 };
 
