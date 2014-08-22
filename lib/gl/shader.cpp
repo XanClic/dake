@@ -354,8 +354,15 @@ template<> void uniform<math::vec4>::assign(const math::vec4 &value)
 { glUniform4fv(id, 1, value); }
 template<> void uniform<float>::assign(const float &value)
 { glUniform1f(id, value); }
+
 template<> void uniform<texture>::assign(const texture &value)
-{ glUniform1i(id, value.get_tmu()); }
+{
+    if (value.bindless()) {
+        glUniformHandleui64ARB(id, value.handle());
+    } else {
+        glUniform1i(id, value.tmu());
+    }
+}
 
 }
 

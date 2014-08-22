@@ -62,13 +62,60 @@ dake::gl::texture::~texture(void)
 
 void dake::gl::texture::bind(void) const
 {
-    glActiveTexture(GL_TEXTURE0 + tmu_index);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
+    if (!bl) {
+        glActiveTexture(GL_TEXTURE0 + tmu_index);
+        glBindTexture(GL_TEXTURE_2D, tex_id);
+    }
+}
+
+
+void dake::gl::texture::make_bindless(bool initially_resident)
+{
+    if (bl) {
+        return;
+    }
+
+    if (!glext.has_bindless_textures()) {
+        throw std::runtime_error("No bindless texture support");
+    }
+
+    bl_handle = glGetTextureHandleARB(tex_id);
+    bl = true;
+
+    if (initially_resident) {
+        make_resident(true);
+    } else {
+        is_resident = false;
+    }
+}
+
+
+void dake::gl::texture::make_resident(bool state)
+{
+    if (!bl) {
+        throw std::runtime_error("Cannot set residency state of non-bindless texture");
+    }
+
+    if (is_resident == state) {
+        return;
+    }
+
+    if (state) {
+        glMakeTextureHandleResidentARB(bl_handle);
+    } else {
+        glMakeTextureHandleNonResidentARB(bl_handle);
+    }
+
+    is_resident = state;
 }
 
 
 void dake::gl::texture::format(GLenum fmt, int w, int h, GLenum read_format, GLenum read_data_format)
 {
+    if (bl) {
+        throw std::runtime_error("Cannot change format of a bindless texture");
+    }
+
     bind();
     glTexImage2D(GL_TEXTURE_2D, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
 }
@@ -76,6 +123,10 @@ void dake::gl::texture::format(GLenum fmt, int w, int h, GLenum read_format, GLe
 
 void dake::gl::texture::filter(GLenum f)
 {
+    if (bl) {
+        throw std::runtime_error("Cannot change filtering of a bindless texture");
+    }
+
     bind();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
