@@ -71,8 +71,10 @@ void dake::gl::vertex_attrib::format(int elements_per_vertex, GLenum type)
 
     switch (type) {
         TYPE(GL_FLOAT, float)
-        TYPE(GL_INT, int)
+        TYPE(GL_INT, int32_t)
         TYPE(GL_DOUBLE, double)
+        TYPE(GL_UNSIGNED_INT, uint32_t)
+        TYPE(GL_UNSIGNED_INT64_ARB, uint64_t)
         default:
             throw std::invalid_argument("Unknown type given for vertex_attrib::format");
     }
@@ -84,7 +86,14 @@ void dake::gl::vertex_attrib::format(int elements_per_vertex, GLenum type)
 void dake::gl::vertex_attrib::load(size_t stride, uintptr_t offset)
 {
     bind();
-    glVertexAttribPointer(attrib, epv, t, GL_FALSE, stride, reinterpret_cast<const void *>(offset));
+
+    if ((t == GL_DOUBLE) || (t == GL_UNSIGNED_INT64_ARB)) {
+        glVertexAttribLPointer(attrib, epv, t, stride, reinterpret_cast<const void *>(offset));
+    } else if ((t == GL_INT) || (t == GL_UNSIGNED_INT)) {
+        glVertexAttribIPointer(attrib, epv, t, stride, reinterpret_cast<const void *>(offset));
+    } else {
+        glVertexAttribPointer(attrib, epv, t, GL_FALSE, stride, reinterpret_cast<const void *>(offset));
+    }
 }
 
 
