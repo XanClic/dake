@@ -56,6 +56,10 @@ dake::gl::texture::texture(void):
 
 dake::gl::texture::~texture(void)
 {
+    if (bl && is_resident) {
+        make_resident(false);
+    }
+
     glDeleteTextures(1, &tex_id);
 }
 
