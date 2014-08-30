@@ -30,11 +30,19 @@ namespace dake
 namespace gl
 {
 
+enum extension {
+    BINDLESS_TEXTURE,
+    STENCIL_TEXTURING,
+    TEXTURE_VIEW,
+};
+
+extern const char *extension_names[];
+
 class glext_info {
     private:
         bool initialized = false;
         std::vector<std::string> exts;
-        bool bindless_txt = false;
+        std::vector<bool> exts_map;
 
 
     public:
@@ -45,9 +53,11 @@ class glext_info {
 
         bool has_extension(const char *name) const;
         bool has_extension(const std::string &name) const;
+        bool has_extension(extension ext) const
+        { return exts_map[static_cast<int>(ext)]; }
 
         bool has_bindless_textures(void) const
-        { return bindless_txt; }
+        { return has_extension(BINDLESS_TEXTURE); }
 };
 
 extern glext_info glext;
