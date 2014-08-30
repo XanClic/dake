@@ -84,6 +84,41 @@ class texture {
 };
 
 
+class array_texture {
+    private:
+        GLuint tex_id;
+        int tmu_index;
+        bool bl = false, is_resident = false;
+        uint64_t bl_handle;
+        int layers;
+
+    public:
+        array_texture(void);
+        ~array_texture(void);
+
+        void bind(bool force = false) const;
+        static void unbind(int tmu = 0);
+
+        bool bindless(void) const { return bl; }
+        void make_bindless(bool resident = true);
+        uint64_t handle(void) const { return bl_handle; }
+        bool resident(void) const { return is_resident; }
+        void make_resident(bool state);
+
+        void format(GLenum format, int w, int h, int layers, GLenum read_format = GL_RGB, GLenum read_data_format = GL_UNSIGNED_BYTE);
+        void filter(GLenum filter);
+        void filter(GLenum min_filter, GLenum mag_filter);
+        void wrap(GLenum wrap);
+        void wrap(GLenum s_wrap, GLenum t_wrap);
+
+        void load_layer(int layer, const image &img);
+
+        int &tmu(void) { return tmu_index; }
+        int tmu(void) const { return tmu_index; }
+        GLuint glid(void) const { return tex_id; }
+};
+
+
 class texture_manager
 {
     private:
