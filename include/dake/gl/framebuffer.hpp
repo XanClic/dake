@@ -18,25 +18,46 @@ extern framebuffer *current_fb;
 
 class framebuffer
 {
+    public:
+        enum depth_stencil_mode {
+            // No depth or stencil buffer
+            NO_DEPTH_OR_STENCIL,
+            // Only depth buffer
+            DEPTH_ONLY,
+            // Only stencil buffer
+            STENCIL_ONLY,
+            // Only stencil or depth buffer are used at a time
+            // (allows combined stencil/depth buffer)
+            STENCIL_XOR_DEPTH,
+            // Both stencil and depth buffer may be used at a time
+            // (not supported (yet))
+            STENCIL_AND_DEPTH,
+        };
+
+
     private:
         int ca_count;
         GLuint id;
         texture *textures;
-        texture depth_buffer;
+        texture *depth_buffer, *stencil_buffer;
         GLenum *draw_buffers;
         GLenum *formats;
         int width, height;
+        depth_stencil_mode dsm;
+        bool depth_buffer_in_stencil_mode = false;
 
 
     public:
-        framebuffer(int color_attachments, GLenum format = GL_RGBA);
+        framebuffer(int color_attachments, GLenum format = GL_RGBA, depth_stencil_mode depth_stencil = DEPTH_ONLY);
         ~framebuffer(void);
 
         texture &operator[](int i);
         texture &depth(void);
+        texture &stencil(void);
 
         void resize(int w, int h);
         void color_format(int i, GLenum format);
+        void depth_format(GLenum format);
 
         void bind(void);
 
