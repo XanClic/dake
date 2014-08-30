@@ -11,6 +11,12 @@ namespace gl
 
 glext_info glext;
 
+const char *extension_names[] = {
+    "GL_ARB_bindless_texture",
+    "GL_ARB_stencil_texturing",
+    "GL_ARB_texture_view",
+};
+
 }
 
 }
@@ -36,7 +42,10 @@ bool dake::gl::glext_info::init(void)
     }
 
 
-    bindless_txt = has_extension("GL_ARB_bindless_texture");
+    exts_map.resize(sizeof(extension_names) / sizeof(extension_names[0]));
+    for (int i = 0; i < static_cast<int>(exts_map.size()); i++) {
+        exts_map[i] = has_extension(extension_names[i]);
+    }
 
 
     initialized = true;
