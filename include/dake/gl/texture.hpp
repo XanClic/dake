@@ -56,6 +56,7 @@ class texture {
         texture(void);
         texture(const std::string &name);
         texture(const image &img);
+        texture(const texture &orig, GLenum format); // creates a texture view
         ~texture(void);
 
         void bind(bool force = false) const;
