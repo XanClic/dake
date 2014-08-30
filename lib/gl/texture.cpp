@@ -6,21 +6,34 @@
 #include <list>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <dake/gl/find_resource.hpp>
 #include <dake/gl/gl.hpp>
 #include <dake/gl/texture.hpp>
 
 
+namespace dake
+{
+
+namespace gl
+{
+
+static std::vector<const texture *> tmu_bindings;
+
+static int active_tmu;
+
+}
+
+}
+
+
 void dake::gl::texture::raw_init(void)
 {
     glGenTextures(1, &tex_id);
 
-    glActiveTexture(GL_TEXTURE0 + tmu_index);
-    glEnable(GL_TEXTURE_2D);
     bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    wrap(GL_CLAMP);
     filter(GL_LINEAR);
 }
 
@@ -32,7 +45,7 @@ dake::gl::texture::texture(const std::string &name):
     raw_init();
 
     dake::gl::image img(name);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
 }
 
 
@@ -42,7 +55,7 @@ dake::gl::texture::texture(const image &img):
 {
     raw_init();
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
 }
 
 
@@ -64,12 +77,44 @@ dake::gl::texture::~texture(void)
 }
 
 
-void dake::gl::texture::bind(void) const
+void dake::gl::texture::bind(bool force) const
 {
-    if (!bl) {
-        glActiveTexture(GL_TEXTURE0 + tmu_index);
-        glBindTexture(GL_TEXTURE_2D, tex_id);
+    if (!bl || force) {
+        if (static_cast<int>(tmu_bindings.size()) < tmu_index + 1) {
+            int old_size = tmu_bindings.size();
+            tmu_bindings.resize(tmu_index + 1);
+
+            for (int i = old_size; i <= tmu_index; i++) {
+                tmu_bindings[i] = nullptr;
+            }
+        }
+
+        if (active_tmu != tmu_index) {
+            glActiveTexture(GL_TEXTURE0 + tmu_index);
+            active_tmu = tmu_index;
+        }
+
+        if (tmu_bindings[tmu_index] != this) {
+            glBindTexture(GL_TEXTURE_2D, tex_id);
+            tmu_bindings[tmu_index] = this;
+        }
     }
+}
+
+
+void dake::gl::texture::unbind(int tmu_index)
+{
+    if ((static_cast<int>(tmu_bindings.size()) < tmu_index + 1) || !tmu_bindings[tmu_index]) {
+        return;
+    }
+
+    if (active_tmu != tmu_index) {
+        glActiveTexture(GL_TEXTURE0 + tmu_index);
+        active_tmu = tmu_index;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    tmu_bindings[tmu_index] = nullptr;
 }
 
 
@@ -127,13 +172,19 @@ void dake::gl::texture::format(GLenum fmt, int w, int h, GLenum read_format, GLe
 
 void dake::gl::texture::filter(GLenum f)
 {
+    filter(f, f);
+}
+
+
+void dake::gl::texture::filter(GLenum min_filter, GLenum mag_filter)
+{
     if (bl) {
         throw std::runtime_error("Cannot change filtering of a bindless texture");
     }
 
     bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
 }
 
 
