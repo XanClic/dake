@@ -58,9 +58,8 @@ class texture {
         texture(const image &img);
         ~texture(void);
 
-        void bind(void) const;
-
-        static void unbind(int tmu = 0) { glActiveTexture(GL_TEXTURE0 + tmu); glBindTexture(GL_TEXTURE_2D, 0); }
+        void bind(bool force = false) const;
+        static void unbind(int tmu = 0);
 
         bool bindless(void) const { return bl; }
         void make_bindless(bool resident = true);
@@ -70,6 +69,9 @@ class texture {
 
         void format(GLenum format, int w, int h, GLenum read_format = GL_RGB, GLenum read_data_format = GL_UNSIGNED_BYTE);
         void filter(GLenum filter);
+        void filter(GLenum min_filter, GLenum mag_filter);
+        void wrap(GLenum wrap);
+        void wrap(GLenum s_wrap, GLenum t_wrap);
         void set_tmu(int tmui) { tmu_index = tmui; }
 
         const std::string &get_fname(void) const { return fname; }
