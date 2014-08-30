@@ -68,6 +68,20 @@ dake::gl::texture::texture(void):
 }
 
 
+dake::gl::texture::texture(const texture &orig, GLenum fmt):
+    tmu_index(0),
+    fname(orig.fname)
+{
+    if (!glext.has_extension(TEXTURE_VIEW)) {
+        throw std::runtime_error("No texture view support");
+    }
+
+    glGenTextures(1, &tex_id);
+
+    glTextureView(tex_id, GL_TEXTURE_2D, orig.tex_id, fmt, 0, 1, 0, 1);
+}
+
+
 dake::gl::texture::~texture(void)
 {
     if (bl && is_resident) {
