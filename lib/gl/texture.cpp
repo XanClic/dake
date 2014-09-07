@@ -333,6 +333,9 @@ void dake::gl::array_texture::format(GLenum fmt, int w, int h, int l, GLenum rea
     bind();
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, fmt, w, h, l, 0, read_format, read_data_format, nullptr);
 
+
+    width  = w;
+    height = h;
     layers = l;
 }
 
@@ -382,6 +385,17 @@ void dake::gl::array_texture::load_layer(int layer, const dake::gl::image &img)
 
     bind(true);
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, img.width(), img.height(), 1, img.gl_format(), img.gl_type(), img.data());
+}
+
+
+void dake::gl::array_texture::load_layer(int layer, const void *data, GLenum f, GLenum df)
+{
+    if ((layer < 0) || (layer >= layers)) {
+        throw std::invalid_argument("Array texture layer out of bounds");
+    }
+
+    bind(true);
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, width, height, 1, f, df, data);
 }
 
 
