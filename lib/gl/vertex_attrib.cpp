@@ -97,7 +97,7 @@ void dake::gl::vertex_attrib::load(size_t stride, uintptr_t offset)
 }
 
 
-void dake::gl::vertex_attrib::data(const void *ptr, size_t size, GLenum usage)
+void dake::gl::vertex_attrib::data(const void *ptr, size_t size, GLenum usage, bool autoload)
 {
     if (size == static_cast<size_t>(-1)) {
         size = va->n * bpv;
@@ -105,7 +105,10 @@ void dake::gl::vertex_attrib::data(const void *ptr, size_t size, GLenum usage)
 
     bind();
     glBufferData(GL_ARRAY_BUFFER, size, ptr, usage);
-    load();
+
+    if (autoload) {
+        load();
+    }
 }
 
 

@@ -38,7 +38,7 @@ class vertex_attrib {
 
         void load(size_t stride = 0, uintptr_t offset = 0);
 
-        void data(const void *ptr, size_t size = static_cast<size_t>(-1), GLenum usage = GL_STATIC_DRAW);
+        void data(const void *ptr, size_t size = static_cast<size_t>(-1), GLenum usage = GL_STATIC_DRAW, bool autoload = true);
 
         void *map(bool readable = false);
         void unmap(void);
