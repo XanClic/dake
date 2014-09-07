@@ -91,7 +91,7 @@ class array_texture {
         int tmu_index;
         bool bl = false, is_resident = false;
         uint64_t bl_handle;
-        int layers;
+        int width, height, layers;
 
     public:
         array_texture(void);
@@ -113,6 +113,7 @@ class array_texture {
         void wrap(GLenum s_wrap, GLenum t_wrap);
 
         void load_layer(int layer, const image &img);
+        void load_layer(int layer, const void *data, GLenum format = GL_RGB, GLenum data_format = GL_UNSIGNED_BYTE);
 
         int &tmu(void) { return tmu_index; }
         int tmu(void) const { return tmu_index; }
