@@ -221,6 +221,17 @@ void dake::gl::texture::wrap(GLenum s_wrap, GLenum t_wrap)
 }
 
 
+void dake::gl::texture::set_border_color(const dake::math::vec4 &color)
+{
+    if (bl) {
+        throw std::runtime_error("Cannot change border color of a bindless texture");
+    }
+
+    bind();
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+}
+
+
 dake::gl::array_texture::array_texture(void):
     tmu_index(0)
 {
@@ -375,6 +386,16 @@ void dake::gl::array_texture::wrap(GLenum s_wrap, GLenum t_wrap)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, t_wrap);
 }
 
+
+void dake::gl::array_texture::set_border_color(const dake::math::vec4 &color)
+{
+    if (bl) {
+        throw std::runtime_error("Cannot change border color of a bindless array texture");
+    }
+
+    bind();
+    glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, color);
+}
 
 
 void dake::gl::array_texture::load_layer(int layer, const dake::gl::image &img)

@@ -5,6 +5,7 @@
 #include <string>
 
 #include "dake/gl/gl.hpp"
+#include "dake/math/matrix.hpp"
 
 
 namespace dake
@@ -73,6 +74,7 @@ class texture {
         void filter(GLenum min_filter, GLenum mag_filter);
         void wrap(GLenum wrap);
         void wrap(GLenum s_wrap, GLenum t_wrap);
+        void set_border_color(const dake::math::vec4 &color);
         void set_tmu(int tmui) { tmu_index = tmui; }
 
         const std::string &get_fname(void) const { return fname; }
@@ -111,6 +113,7 @@ class array_texture {
         void filter(GLenum min_filter, GLenum mag_filter);
         void wrap(GLenum wrap);
         void wrap(GLenum s_wrap, GLenum t_wrap);
+        void set_border_color(const dake::math::vec4 &color);
 
         void load_layer(int layer, const image &img);
         void load_layer(int layer, const void *data, GLenum format = GL_RGB, GLenum data_format = GL_UNSIGNED_BYTE);
