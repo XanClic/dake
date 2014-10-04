@@ -154,7 +154,7 @@ template<int R, int C, typename T> class mat {
         static mat<R, C, T> zero(void)
         {
             mat<R, C, T> z;
-            memset(z.d, 0.f, sizeof(z.d));
+            memset(z.d, 0, sizeof(z.d));
             return z;
         }
 
@@ -186,6 +186,19 @@ template<int R, int C, typename T> class mat {
             static_assert(R == 4 && C == 4 && std::is_floating_point<T>::value, "projection() is defined for 4x4 floating point matrices only");
             float f = 1.f / tanf(fovy / 2.f);
             return mat4(vec4(f / aspect, 0.f, 0.f, 0.f), vec4(0.f, f, 0.f, 0.f), vec4(0.f, 0.f, (zn + zf) / (zn - zf), -1.f), vec4(0.f, 0.f, 2.f * (zn * zf) / (zn - zf), 0.f));
+        }
+
+
+        static mat<R, C, T> direction(const mat<3, 1, T> &v)
+        {
+            static_assert(R == 4 && C == 1, "direction() is defined for vec4 only");
+            return mat<4, 1, T>(v.x(), v.y(), v.z(), T(0));
+        }
+
+        static mat<R, C, T> position(const mat<3, 1, T> &v)
+        {
+            static_assert(R == 4 && C == 1, "position() is defined for vec4 only");
+            return mat<4, 1, T>(v.x(), v.y(), v.z(), T(1));
         }
 
 
