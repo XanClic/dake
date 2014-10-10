@@ -16,8 +16,7 @@ class framebuffer;
 extern framebuffer *current_fb;
 
 
-class framebuffer
-{
+class framebuffer {
     public:
         enum depth_stencil_mode {
             // No depth or stencil buffer
@@ -45,10 +44,11 @@ class framebuffer
         int width, height;
         depth_stencil_mode dsm;
         bool depth_buffer_in_stencil_mode = false;
+        int spp = 1;
 
 
     public:
-        framebuffer(int color_attachments, GLenum format = GL_RGBA, depth_stencil_mode depth_stencil = DEPTH_ONLY);
+        framebuffer(int color_attachments, GLenum format = GL_RGBA, depth_stencil_mode depth_stencil = DEPTH_ONLY, int multisample = 0);
         ~framebuffer(void);
 
         texture &operator[](int i);
@@ -60,6 +60,7 @@ class framebuffer
         void depth_format(GLenum format);
 
         void bind(void);
+        void blit(int sx = 0, int sy = 0, int sw = -1, int sh = -1, int dx = 0, int dy = 0, int dw = -1, int dh = -1, GLenum mask = GL_COLOR_BUFFER_BIT, GLenum filter = GL_NEAREST);
 
         static framebuffer *current(void) { return current_fb; }
 

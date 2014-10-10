@@ -46,7 +46,18 @@ dake::gl::texture::texture(const std::string &name):
     raw_init();
 
     dake::gl::image img(name);
-    glTexImage2D(GL_TEXTURE_2D, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+}
+
+
+dake::gl::texture::texture(const char *name):
+    tmu_index(0),
+    fname(name)
+{
+    raw_init();
+
+    dake::gl::image img(name);
+    glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
 }
 
 
@@ -56,14 +67,16 @@ dake::gl::texture::texture(const image &img):
 {
     raw_init();
 
-    glTexImage2D(GL_TEXTURE_2D, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
 }
 
 
-dake::gl::texture::texture(void):
+dake::gl::texture::texture(bool multisample):
     tmu_index(0),
-    fname("[anon]")
+    fname("[anon]"),
+    multisampled(multisample)
 {
+    target = multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
     raw_init();
 }
 
@@ -78,7 +91,7 @@ dake::gl::texture::texture(const texture &orig, GLenum fmt):
 
     glGenTextures(1, &tex_id);
 
-    glTextureView(tex_id, GL_TEXTURE_2D, orig.tex_id, fmt, 0, 1, 0, 1);
+    glTextureView(tex_id, target, orig.tex_id, fmt, 0, 1, 0, 1);
 }
 
 
@@ -110,7 +123,7 @@ void dake::gl::texture::bind(bool force) const
         }
 
         if (tmu_bindings[tmu_index] != this) {
-            glBindTexture(GL_TEXTURE_2D, tex_id);
+            glBindTexture(target, tex_id);
             tmu_bindings[tmu_index] = this;
         }
     }
@@ -129,6 +142,7 @@ void dake::gl::texture::unbind(int tmu_index)
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     tmu_bindings[tmu_index] = nullptr;
 }
 
@@ -174,14 +188,21 @@ void dake::gl::texture::make_resident(bool state)
 }
 
 
-void dake::gl::texture::format(GLenum fmt, int w, int h, GLenum read_format, GLenum read_data_format)
+void dake::gl::texture::format(GLenum fmt, int w, int h, GLenum read_format, GLenum read_data_format, int spp)
 {
     if (bl) {
         throw std::runtime_error("Cannot change format of a bindless texture");
     }
 
     bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+
+    if (multisampled) {
+        glTexImage2DMultisample(target, spp, fmt, w, h, false);
+    } else if (spp == 1) {
+        glTexImage2D(target, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+    } else {
+        throw std::invalid_argument("Cannot use another sample per pixel count than 1 for non-multisample textures");
+    }
 }
 
 
@@ -198,8 +219,8 @@ void dake::gl::texture::filter(GLenum min_filter, GLenum mag_filter)
     }
 
     bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, min_filter);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, mag_filter);
 }
 
 
@@ -216,8 +237,8 @@ void dake::gl::texture::wrap(GLenum s_wrap, GLenum t_wrap)
     }
 
     bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s_wrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t_wrap);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, s_wrap);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, t_wrap);
 }
 
 
@@ -228,7 +249,7 @@ void dake::gl::texture::set_border_color(const dake::math::vec4 &color)
     }
 
     bind();
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+    glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, color);
 }
 
 

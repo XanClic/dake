@@ -50,12 +50,15 @@ class texture {
         std::string fname;
         bool bl = false, is_resident = false;
         uint64_t bl_handle;
+        bool multisampled = false;
+        GLenum target = GL_TEXTURE_2D;
 
         void raw_init(void);
 
     public:
-        texture(void);
+        texture(bool multisample = false);
         texture(const std::string &name);
+        texture(const char *name); // so this isn't converted to bool
         texture(const image &img);
         texture(const texture &orig, GLenum format); // creates a texture view
         ~texture(void);
@@ -69,7 +72,7 @@ class texture {
         bool resident(void) const { return is_resident; }
         void make_resident(bool state);
 
-        void format(GLenum format, int w, int h, GLenum read_format = GL_RGB, GLenum read_data_format = GL_UNSIGNED_BYTE);
+        void format(GLenum format, int w, int h, GLenum read_format = GL_RGB, GLenum read_data_format = GL_UNSIGNED_BYTE, int spp = 1);
         void filter(GLenum filter);
         void filter(GLenum min_filter, GLenum mag_filter);
         void wrap(GLenum wrap);
