@@ -21,6 +21,7 @@ namespace gl
 
 static std::vector<const texture *> tmu_bindings;
 static std::vector<const array_texture *> tmu_array_bindings;
+static std::vector<const cubemap *> tmu_cubemap_bindings;
 
 static int active_tmu;
 
@@ -438,6 +439,190 @@ void dake::gl::array_texture::load_layer(int layer, const void *data, GLenum f, 
 
     bind(true);
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, width, height, 1, f, df, data);
+}
+
+
+dake::gl::cubemap::cubemap(void):
+    tmu_index(0)
+{
+    glGenTextures(1, &tex_id);
+
+    bind();
+    wrap(GL_CLAMP);
+    filter(GL_LINEAR);
+}
+
+
+dake::gl::cubemap::~cubemap(void)
+{
+    if (bl && is_resident) {
+        make_resident(false);
+    }
+
+    glDeleteTextures(1, &tex_id);
+}
+
+
+void dake::gl::cubemap::bind(bool force) const
+{
+    if (!bl || force) {
+        if (static_cast<int>(tmu_cubemap_bindings.size()) < tmu_index + 1) {
+            int old_size = tmu_cubemap_bindings.size();
+            tmu_cubemap_bindings.resize(tmu_index + 1);
+
+            for (int i = old_size; i <= tmu_index; i++) {
+                tmu_cubemap_bindings[i] = nullptr;
+            }
+        }
+
+        if (active_tmu != tmu_index) {
+            glActiveTexture(GL_TEXTURE0 + tmu_index);
+            active_tmu = tmu_index;
+        }
+
+        if (tmu_cubemap_bindings[tmu_index] != this) {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, tex_id);
+            tmu_cubemap_bindings[tmu_index] = this;
+        }
+    }
+}
+
+
+void dake::gl::cubemap::unbind(int tmu_index)
+{
+    if ((static_cast<int>(tmu_cubemap_bindings.size()) < tmu_index + 1) || !tmu_cubemap_bindings[tmu_index]) {
+        return;
+    }
+
+    if (active_tmu != tmu_index) {
+        glActiveTexture(GL_TEXTURE0 + tmu_index);
+        active_tmu = tmu_index;
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    tmu_cubemap_bindings[tmu_index] = nullptr;
+}
+
+
+void dake::gl::cubemap::make_bindless(bool initially_resident)
+{
+    if (bl) {
+        return;
+    }
+
+    if (!glext.has_bindless_textures()) {
+        throw std::runtime_error("No bindless texture support");
+    }
+
+    bl_handle = glGetTextureHandleARB(tex_id);
+    bl = true;
+
+    if (initially_resident) {
+        make_resident(true);
+    } else {
+        is_resident = false;
+    }
+}
+
+
+void dake::gl::cubemap::make_resident(bool state)
+{
+    if (!bl) {
+        throw std::runtime_error("Cannot set residency state of non-bindless cube map");
+    }
+
+    if (is_resident == state) {
+        return;
+    }
+
+    if (state) {
+        glMakeTextureHandleResidentARB(bl_handle);
+    } else {
+        glMakeTextureHandleNonResidentARB(bl_handle);
+    }
+
+    is_resident = state;
+}
+
+
+void dake::gl::cubemap::format(GLenum fmt, int w, int h, GLenum read_format, GLenum read_data_format)
+{
+    if (bl) {
+        throw std::runtime_error("Cannot change format of a bindless cube map");
+    }
+
+    bind();
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, fmt, w, h, 0, read_format, read_data_format, nullptr);
+
+
+    width  = w;
+    height = h;
+}
+
+
+void dake::gl::cubemap::filter(GLenum f)
+{
+    filter(f, f);
+}
+
+
+void dake::gl::cubemap::filter(GLenum min_filter, GLenum mag_filter)
+{
+    if (bl) {
+        throw std::runtime_error("Cannot change filtering of a bindless cube map");
+    }
+
+    bind();
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, min_filter);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, mag_filter);
+}
+
+
+void dake::gl::cubemap::wrap(GLenum w)
+{
+    wrap(w, w);
+}
+
+
+void dake::gl::cubemap::wrap(GLenum s_wrap, GLenum t_wrap)
+{
+    if (bl) {
+        throw std::runtime_error("Cannot change wrap mode of a bindless cube map");
+    }
+
+    bind();
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, s_wrap);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, t_wrap);
+}
+
+
+void dake::gl::cubemap::set_border_color(const dake::math::vec4 &color)
+{
+    if (bl) {
+        throw std::runtime_error("Cannot change border color of a bindless cube map");
+    }
+
+    bind();
+    glTexParameterfv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BORDER_COLOR, color);
+}
+
+
+void dake::gl::cubemap::load_layer(layer l, const dake::gl::image &img)
+{
+    bind(true);
+    glTexSubImage2D(l, 0, 0, 0, img.width(), img.height(), img.gl_format(), img.gl_type(), img.data());
+}
+
+
+void dake::gl::cubemap::load_layer(layer l, const void *data, GLenum f, GLenum df)
+{
+    bind(true);
+    glTexSubImage2D(l, 0, 0, 0, width, height, f, df, data);
 }
 
 
