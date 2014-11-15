@@ -373,6 +373,15 @@ template<> void uniform<array_texture>::assign(const array_texture &value)
     }
 }
 
+template<> void uniform<cubemap>::assign(const cubemap &value)
+{
+    if (value.bindless()) {
+        glUniformHandleui64ARB(id, value.handle());
+    } else {
+        glUniform1i(id, value.tmu());
+    }
+}
+
 }
 
 }

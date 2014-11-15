@@ -127,6 +127,52 @@ class array_texture {
 };
 
 
+class cubemap {
+    private:
+        GLuint tex_id;
+        int tmu_index;
+        bool bl = false, is_resident = false;
+        uint64_t bl_handle;
+        int width, height;
+
+    public:
+        enum layer {
+            RIGHT  = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+            LEFT   = GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+            TOP    = GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+            BOTTOM = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+            FRONT  = GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+            BACK   = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+        };
+
+        cubemap(void);
+        ~cubemap(void);
+
+        void bind(bool force = false) const;
+        static void unbind(int tmu = 0);
+
+        bool bindless(void) const { return bl; }
+        void make_bindless(bool resident = true);
+        uint64_t handle(void) const { return bl_handle; }
+        bool resident(void) const { return is_resident; }
+        void make_resident(bool state);
+
+        void format(GLenum format, int w, int h, GLenum read_format = GL_RGB, GLenum read_data_format = GL_UNSIGNED_BYTE);
+        void filter(GLenum filter);
+        void filter(GLenum min_filter, GLenum mag_filter);
+        void wrap(GLenum wrap);
+        void wrap(GLenum s_wrap, GLenum t_wrap);
+        void set_border_color(const dake::math::vec4 &color);
+
+        void load_layer(layer l, const image &img);
+        void load_layer(layer l, const void *data, GLenum format = GL_RGB, GLenum data_format = GL_UNSIGNED_BYTE);
+
+        int &tmu(void) { return tmu_index; }
+        int tmu(void) const { return tmu_index; }
+        GLuint glid(void) const { return tex_id; }
+};
+
+
 class texture_manager
 {
     private:
