@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cerrno>
 #include <cstdint>
 #include <cstdio>
@@ -233,6 +234,42 @@ dake::gl::image::image(const void *buffer, size_t length)
     }
 
     free(name);
+}
+
+
+dake::gl::image::image(const dake::gl::image &i1, const dake::gl::image &i2)
+{
+    if (i1.channels() + i2.channels() > 4) {
+        throw std::invalid_argument("Images have too many channels");
+    }
+
+    if ((i1.width() != i2.width()) || (i1.height() != i2.height())) {
+        throw std::invalid_argument("Images do not have the same size");
+    }
+
+    assert(i1.format() == LINEAR_UINT8);
+    assert(i2.format() == LINEAR_UINT8);
+
+    w = i1.width();
+    h = i1.height();
+    cc = i1.channels() + i2.channels();
+    fmt = LINEAR_UINT8;
+
+    d = new uint8_t[w * h * cc];
+
+    const uint8_t *s1 = static_cast<const uint8_t *>(i1.data());
+    const uint8_t *s2 = static_cast<const uint8_t *>(i2.data());
+
+    uint8_t *dst = static_cast<uint8_t *>(d);
+
+    for (int i = 0; i < w * h; i++) {
+        for (int c = 0; c < i1.channels(); c++) {
+            *(dst++) = *(s1++);
+        }
+        for (int c = 0; c < i2.channels(); c++) {
+            *(dst++) = *(s2++);
+        }
+    }
 }
 
 
