@@ -47,7 +47,11 @@ dake::gl::texture::texture(const std::string &name):
     raw_init();
 
     dake::gl::image img(name);
-    glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    if (img.compressed()) {
+        glCompressedTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.byte_size(), img.data());
+    } else {
+        glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    }
 }
 
 
@@ -58,7 +62,11 @@ dake::gl::texture::texture(const char *name):
     raw_init();
 
     dake::gl::image img(name);
-    glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    if (img.compressed()) {
+        glCompressedTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.byte_size(), img.data());
+    } else {
+        glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    }
 }
 
 
@@ -68,7 +76,11 @@ dake::gl::texture::texture(const image &img):
 {
     raw_init();
 
-    glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    if (img.compressed()) {
+        glCompressedTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.byte_size(), img.data());
+    } else {
+        glTexImage2D(target, 0, img.gl_format(), img.width(), img.height(), 0, img.gl_format(), img.gl_type(), img.data());
+    }
 }
 
 
@@ -427,7 +439,11 @@ void dake::gl::array_texture::load_layer(int layer, const dake::gl::image &img)
     }
 
     bind(true);
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, img.width(), img.height(), 1, img.gl_format(), img.gl_type(), img.data());
+    if (img.compressed()) {
+        glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, img.width(), img.height(), 1, img.gl_format(), img.byte_size(), img.data());
+    } else {
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, img.width(), img.height(), 1, img.gl_format(), img.gl_type(), img.data());
+    }
 }
 
 
@@ -615,7 +631,11 @@ void dake::gl::cubemap::set_border_color(const dake::math::vec4 &color)
 void dake::gl::cubemap::load_layer(layer l, const dake::gl::image &img)
 {
     bind(true);
-    glTexSubImage2D(l, 0, 0, 0, img.width(), img.height(), img.gl_format(), img.gl_type(), img.data());
+    if (img.compressed()) {
+        glCompressedTexSubImage2D(l, 0, 0, 0, img.width(), img.height(), img.gl_format(), img.byte_size(), img.data());
+    } else {
+        glTexSubImage2D(l, 0, 0, 0, img.width(), img.height(), img.gl_format(), img.gl_type(), img.data());
+    }
 }
 
 
