@@ -7,8 +7,11 @@
 #include <stdexcept>
 #include <string>
 
+extern "C" {
 #include <png.h>
 #include <jpeglib.h>
+#include <txc_dxtn.h>
+}
 
 #include <dake/gl/find_resource.hpp>
 #include <dake/gl/gl.hpp>
@@ -247,15 +250,18 @@ dake::gl::image::image(const dake::gl::image &i1, const dake::gl::image &i2)
         throw std::invalid_argument("Images do not have the same size");
     }
 
-    assert(i1.format() == LINEAR_UINT8);
-    assert(i2.format() == LINEAR_UINT8);
+    if ((i1.format() != LINEAR_UINT8) || (i2.format() != LINEAR_UINT8)) {
+        throw std::invalid_argument("Images are not in linear uint8 format");
+    }
 
     w = i1.width();
     h = i1.height();
     cc = i1.channels() + i2.channels();
     fmt = LINEAR_UINT8;
 
-    d = new uint8_t[w * h * cc];
+    bsz = w * h * cc;
+
+    d = new uint8_t[bsz];
 
     const uint8_t *s1 = static_cast<const uint8_t *>(i1.data());
     const uint8_t *s2 = static_cast<const uint8_t *>(i2.data());
@@ -269,6 +275,87 @@ dake::gl::image::image(const dake::gl::image &i1, const dake::gl::image &i2)
         for (int c = 0; c < i2.channels(); c++) {
             *(dst++) = *(s2++);
         }
+    }
+}
+
+
+static const GLenum gl_types[] = {
+    GL_UNSIGNED_BYTE,                 // LINEAR_UINT8
+    GL_COMPRESSED_RGB_S3TC_DXT1_EXT,  // COMPRESSED_S3TC_DXT1
+    GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, // COMPRESSED_S3TC_DXT1_ALPHA
+    GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, // COMPRESSED_S3TC_DXT3
+    GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, // COMPRESSED_S3TC_DXT5
+};
+
+
+dake::gl::image::image(const dake::gl::image &input, channel_format new_format, int new_channels)
+{
+    if (!new_channels) {
+        new_channels = input.channels();
+    }
+
+    switch (new_format) {
+        case LINEAR_UINT8:
+            bsz = input.width() * input.height() * new_channels;
+            break;
+
+        case COMPRESSED_S3TC_DXT1:
+        case COMPRESSED_S3TC_DXT1_ALPHA:
+            bsz = ((input.width() + 3) / 4) * ((input.height() + 3) / 4) * 8;
+            break;
+
+        case COMPRESSED_S3TC_DXT3:
+        case COMPRESSED_S3TC_DXT5:
+            bsz = ((input.width() + 3) / 4) * ((input.height() + 3) / 4) * 16;
+            break;
+
+        default:
+            abort();
+    }
+
+    if (input.format() == new_format) {
+        if (new_format != LINEAR_UINT8) {
+            if (new_channels != input.channels()) {
+                throw std::invalid_argument("Cannot change channel count of compressed images");
+            }
+        }
+
+        fmt = input.format();
+        w = input.width();
+        h = input.height();
+        cc = new_channels;
+
+        d = new uint8_t[bsz];
+        if (new_channels == input.channels()) {
+            memcpy(d, input.data(), bsz);
+        } else {
+            assert(input.format() == LINEAR_UINT8);
+
+            const uint8_t *inp = static_cast<const uint8_t *>(input.data());
+            uint8_t *outp = static_cast<uint8_t *>(d);
+
+            for (int i = 0; i < w * h; i++) {
+                for (int c = 0; c < cc; c++) {
+                    *(outp++) = (c < input.channels() ? *(inp++) : 0);
+                }
+                for (int c = 0; c < input.channels() - cc; c++) {
+                    inp++;
+                }
+            }
+        }
+    } else if (new_format == LINEAR_UINT8) {
+        throw std::invalid_argument("Decompression is not yet supported");
+    } else if (input.format() == LINEAR_UINT8) {
+        fmt = new_format;
+        w = input.width();
+        h = input.height();
+        cc = (new_format == COMPRESSED_S3TC_DXT1) ? 3 : 4;
+
+        d = new uint8_t[bsz];
+        tx_compress_dxtn(input.channels(), w, h, static_cast<const uint8_t *>(input.data()), gl_types[fmt],
+                         static_cast<uint8_t *>(d), 0);
+    } else {
+        throw std::invalid_argument("Recompression is not supported");
     }
 }
 
@@ -288,6 +375,9 @@ void dake::gl::image::load(const void *buffer, size_t length, const std::string 
             } catch (const std::exception &e) {
                 throw std::runtime_error("Could not load image from " + name + ": " + e.what());
             }
+
+            assert(fmt == LINEAR_UINT8);
+            bsz = w * h * cc;
 
             return;
         }
@@ -318,16 +408,33 @@ static const GLenum gl_formats[] = {
 
 GLenum dake::gl::image::gl_format(void) const
 {
-    return gl_formats[cc - 1];
+    if (compressed()) {
+        return gl_type();
+    } else {
+        return gl_formats[cc - 1];
+    }
 }
-
-
-static const GLenum gl_types[] = {
-    GL_UNSIGNED_BYTE, // LINEAR_UINT8
-};
 
 
 GLenum dake::gl::image::gl_type(void) const
 {
     return gl_types[fmt];
+}
+
+
+bool dake::gl::image::compressed(void) const
+{
+    switch (fmt) {
+        case LINEAR_UINT8:
+            return false;
+
+        case COMPRESSED_S3TC_DXT1:
+        case COMPRESSED_S3TC_DXT1_ALPHA:
+        case COMPRESSED_S3TC_DXT3:
+        case COMPRESSED_S3TC_DXT5:
+            return true;
+
+        default:
+            abort();
+    }
 }

@@ -17,13 +17,18 @@ namespace gl
 class image {
     public:
         enum channel_format {
-            LINEAR_UINT8
+            LINEAR_UINT8,
+            COMPRESSED_S3TC_DXT1,
+            COMPRESSED_S3TC_DXT1_ALPHA,
+            COMPRESSED_S3TC_DXT3,
+            COMPRESSED_S3TC_DXT5,
         };
 
     private:
         void *d = nullptr;
         channel_format fmt;
         int w, h, cc;
+        size_t bsz;
 
         void load(const void *buffer, size_t length, const std::string &name);
 
@@ -31,6 +36,7 @@ class image {
         image(const std::string &file);
         image(const void *buffer, size_t length);
         image(const image &i1, const image &i2);
+        image(const image &input, channel_format new_format, int new_channels = 0);
         ~image(void);
 
         int width(void) const { return w; }
@@ -38,9 +44,12 @@ class image {
         int channels(void) const { return cc; }
         channel_format format(void) const { return fmt; }
         const void *data(void) const { return d; }
+        size_t byte_size(void) const { return bsz; }
 
         GLenum gl_format(void) const;
         GLenum gl_type(void) const;
+
+        bool compressed(void) const;
 };
 
 
