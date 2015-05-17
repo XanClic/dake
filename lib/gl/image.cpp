@@ -99,6 +99,7 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
             memcpy(&output[ofs], rows[y], w * *channels);
             ofs += w * *channels;
         }
+        ofs = (ofs + 3) & ~3u;
     }
 
     png_destroy_read_struct(&png_ptr, &info_ptr, &info_end);
@@ -163,7 +164,7 @@ void *load_jpg(const void *buffer, size_t length, int *width, int *height, int *
     uint8_t *target = output;
     while (static_cast<int>(cinfo.output_scanline) < *height) {
         jpeg_read_scanlines(&cinfo, &target, 1);
-        target += *width * *channels;
+        target += (*width * *channels + 3) & ~3u;
     }
 
     jpeg_finish_decompress(&cinfo);
