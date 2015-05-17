@@ -354,6 +354,10 @@ template<> void uniform<math::vec4>::assign(const math::vec4 &value)
 { glUniform4fv(id, 1, value); }
 template<> void uniform<float>::assign(const float &value)
 { glUniform1f(id, value); }
+template<> void uniform<uint32_t>::assign(const uint32_t &value)
+{ glUniform1ui(id, value); }
+template<> void uniform<int32_t>::assign(const int32_t &value)
+{ glUniform1i(id, value); }
 
 template<> void uniform<texture>::assign(const texture &value)
 {
