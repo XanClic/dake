@@ -28,7 +28,7 @@ dake::gl::shader::shader(GLint tp, GLuint glid):
 
 
 dake::gl::shader::shader(dake::gl::shader::type tp, const char *src_file):
-    t(tp)
+    t(tp), name(src_file)
 {
     id = glCreateShader(tp);
     if (!id) {
