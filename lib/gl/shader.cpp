@@ -106,10 +106,11 @@ void dake::gl::shader::load(const char *file)
 
     char *src = new char[len + 1];
     if (fread(src, 1, len, fp) < len) {
+        const char *err = strerror(errno);
         fclose(fp);
         delete[] src;
         throw std::runtime_error("Failed to read shader code from " + name
-                                 + ": " + strerror(errno));
+                                 + ": " + err);
     }
     src[len] = 0;
 
