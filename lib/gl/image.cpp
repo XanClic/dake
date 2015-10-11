@@ -352,7 +352,12 @@ dake::gl::image::image(const std::string &file)
     rewind(fp);
 
     void *buffer = malloc(lof);
-    fread(buffer, 1, lof, fp);
+    if (fread(buffer, 1, lof, fp) < lof) {
+        fclose(fp);
+        free(buffer);
+        throw std::runtime_error("Failed to read image from " + file + ": "
+                                 + strerror(errno));
+    }
 
     fclose(fp);
 
