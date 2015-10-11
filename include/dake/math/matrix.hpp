@@ -189,6 +189,16 @@ template<int R, int C, typename T> class mat {
         }
 
 
+        static mat<R, C, T> orthographic(float left, float right, float top, float bottom, float near, float far)
+        {
+            static_assert(R == 4 && C == 4 && std::is_floating_point<T>::value, "orthographic() is defined for 4x4 floating point matrices only");
+            return mat4(vec4(2.f / (right - left), 0.f, 0.f, 0.f),
+                        vec4(0.f, 2.f / (top - bottom), 0.f, 0.f),
+                        vec4(0.f, 0.f, 2.f / (near - far), 0.f),
+                        vec4((right + left) / (left - right), (top + bottom) / (bottom - top), (far + near) / (near - far), 1.f));
+        }
+
+
         static mat<R, C, T> direction(const mat<3, 1, T> &v)
         {
             static_assert(R == 4 && C == 1, "direction() is defined for vec4 only");
