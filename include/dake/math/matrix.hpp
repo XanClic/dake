@@ -514,7 +514,8 @@ template<int R, int C, typename T> class mat {
 #endif
 
             char *result = static_cast<char *>(malloc(Rr * Cr * 64));
-            fread(result, 1, Rr * Cr * 64, pfp);
+            size_t fread_res = fread(result, 1, Rr * Cr * 64, pfp);
+            (void)fread_res; // thank you based gcc
 
             if (!feof(pfp)) {
                 throw std::runtime_error("Could not retrieve result matrix from ruby: Too much data");

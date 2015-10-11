@@ -105,13 +105,18 @@ void dake::gl::shader::load(const char *file)
     rewind(fp);
 
     char *src = new char[len + 1];
-    fread(src, 1, len, fp);
+    if (fread(src, 1, len, fp) < len) {
+        fclose(fp);
+        delete[] src;
+        throw std::runtime_error("Failed to read shader code from " + name
+                                 + ": " + strerror(errno));
+    }
     src[len] = 0;
 
     fclose(fp);
 
     glShaderSource(id, 1, const_cast<const GLchar **>(&src), nullptr);
-    delete src;
+    delete[] src;
 }
 
 
