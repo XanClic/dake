@@ -109,6 +109,142 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
 }
 
 
+struct bitmap_file_header {
+    uint16_t bfType;
+    uint32_t bfSize;
+    uint32_t bfReserved;
+    uint32_t bfOffBits;
+} __attribute__((packed));
+
+struct bitmap_info_header {
+    uint32_t biSize;
+    int32_t biWidth;
+    int32_t biHeight;
+    uint16_t biPlanes;
+    uint16_t biBitCount;
+    uint32_t biCompression;
+    uint32_t biSizeImage;
+    int32_t biXPelsPerMeter;
+    int32_t biYPelsPerMeter;
+    uint32_t biClrUsed;
+    uint32_t biClrImportant;
+} __attribute__((packed));
+
+bool test_bmp(const void *buffer, size_t length)
+{
+    return length >= 54 && !strncmp((const char *)buffer, "BM", 2);
+}
+
+
+void *load_bmp(const void *buffer, size_t length, int *width, int *height, int *channels, dake::gl::image::channel_format *format)
+{
+    const bitmap_file_header *bfh = static_cast<const bitmap_file_header *>(buffer);
+    const bitmap_info_header *bih = reinterpret_cast<const bitmap_info_header *>(bfh + 1);
+
+    if (bih->biCompression) {
+        throw std::runtime_error("BMP is compressed");
+    }
+
+    if (bih->biBitCount != 1 && bih->biBitCount != 4 && bih->biBitCount != 8 &&
+        bih->biBitCount != 16 && bih->biBitCount != 24 && bih->biBitCount != 32)
+    {
+        throw std::runtime_error("Invalid BMP bit count");
+    }
+
+    *width  = bih->biWidth;
+    *height = abs(bih->biHeight);
+    if (bih->biBitCount < 32) {
+        *channels = 3;
+    } else {
+        *channels = 4;
+    }
+
+    int pal_entries = -1;
+    if (bih->biBitCount <= 8) {
+        pal_entries = bih->biClrUsed ? bih->biClrUsed : 1 << bih->biBitCount;
+        if (pal_entries > 1 << bih->biBitCount) {
+            pal_entries = 1 << bih->biBitCount;
+        }
+    }
+
+    const uint8_t *pal = nullptr;
+    if (pal_entries >= 0) {
+        pal = reinterpret_cast<const uint8_t *>(bih + 1);
+    }
+
+    *format = dake::gl::image::channel_format::LINEAR_UINT8;
+    uint8_t *output = new uint8_t[*height * ((*width * *channels + 3) & ~3u)];
+    const uint8_t *input = static_cast<const uint8_t *>(buffer) + bfh->bfOffBits;
+
+    int total = *width * *height * *channels;
+    int i = 0, o = 0;
+    int scanline = ((*width * bih->biBitCount + 7) / 8 + 3) & ~3u;
+
+    for (int y = 0; y < *height; y++) {
+        if (bih->biHeight < 0) {
+            i = y * scanline;
+        } else {
+            i = (*height - y - 1) * scanline;
+        }
+        o = (o + 3) & ~3u;
+
+        for (int x = 0; x < *width; x++) {
+            if (pal) {
+                if (length - i < 1) {
+                    throw std::runtime_error("Unexpected end of BMP");
+                }
+                int to_read = 8 / bih->biBitCount;
+                while (o < total && to_read--) {
+                    int pi = input[i];
+
+                    pi >>= to_read * bih->biBitCount;
+                    pi &= (1 << bih->biBitCount) - 1;
+                    if (pi >= pal_entries) {
+                        throw std::runtime_error("BMP palette index out of bounds");
+                    }
+
+                    const uint8_t *pe = &pal[pi];
+                    output[o++] = pe[2];
+                    output[o++] = pe[1];
+                    output[o++] = pe[0];
+
+                    if (to_read) {
+                        if (++x == *width) {
+                            --x;
+                            break;
+                        }
+                    }
+                }
+            } else if (bih->biBitCount == 16) {
+                uint16_t val;
+                if (length - i < 2) {
+                    throw std::runtime_error("Unexpected end of BMP");
+                }
+                val = input[i++];
+                val |= input[i++] << 8;
+                output[o++] = (val >> 10) & 0x1f;
+                output[o++] = (val >>  5) & 0x1f;
+                output[o++] =  val        & 0x1f;
+            } else {
+                assert(bih->biBitCount == 24 || bih->biBitCount == 32);
+                if (length - i < 4) {
+                    throw std::runtime_error("Unexpected end of BMP");
+                }
+                if (bih->biBitCount == 32) {
+                    output[o++] = input[i + 3];
+                }
+                output[o++] = input[i + 2];
+                output[o++] = input[i + 1];
+                output[o++] = input[i + 0];
+                i += bih->biBitCount / 8;
+            }
+        }
+    }
+
+    return output;
+}
+
+
 bool test_jpg(const void *buffer, size_t length)
 {
     jpeg_decompress_struct cinfo;
@@ -188,6 +324,12 @@ static const image_format formats[] = {
         "png",
         test_png,
         load_png
+    },
+
+    {
+        "bmp",
+        test_bmp,
+        load_bmp
     },
 
     {
