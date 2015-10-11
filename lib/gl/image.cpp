@@ -85,7 +85,7 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
         png_get_PLTE(png_ptr, info_ptr, &palette, &palette_entries);
     }
 
-    uint8_t *output = new uint8_t[w * h * *channels];
+    uint8_t *output = new uint8_t[h * ((w * *channels + 3) & ~3u)];
     uint32_t ofs = 0;
     for (uint32_t y = 0; y < h; y++) {
         if (fmt == PNG_COLOR_TYPE_PALETTE) {
@@ -160,7 +160,7 @@ void *load_jpg(const void *buffer, size_t length, int *width, int *height, int *
     *channels = cinfo.output_components;
     *format   = dake::gl::image::LINEAR_UINT8;
 
-    uint8_t *output = new uint8_t[*width * *height * *channels];
+    uint8_t *output = new uint8_t[*height * ((*width * *channels + 3) & ~3u)];
     uint8_t *target = output;
     while (static_cast<int>(cinfo.output_scanline) < *height) {
         jpeg_read_scanlines(&cinfo, &target, 1);
