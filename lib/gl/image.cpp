@@ -353,10 +353,11 @@ dake::gl::image::image(const std::string &file)
 
     void *buffer = malloc(lof);
     if (fread(buffer, 1, lof, fp) < lof) {
+        const char *err = strerror(errno);
         fclose(fp);
         free(buffer);
         throw std::runtime_error("Failed to read image from " + file + ": "
-                                 + strerror(errno));
+                                 + err);
     }
 
     fclose(fp);
