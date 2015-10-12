@@ -381,11 +381,11 @@ dake::gl::image::image(const void *buffer, size_t length)
     try {
         load(buffer, length, name);
     } catch (...) {
-        free(name);
+        delete[] name;
         throw;
     }
 
-    free(name);
+    delete[] name;
 }
 
 
@@ -511,7 +511,8 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
 
 dake::gl::image::~image(void)
 {
-    free(d);
+    // FIXME (should use the correct type)
+    delete[] static_cast<uint8_t *>(d);
 }
 
 
