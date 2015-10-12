@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS = -O3 -Wall -Wextra -Wshadow -std=c++11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY
+CXXFLAGS = -O3 -Wall -Wextra -Wshadow -std=c++11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY -g2
 AR ?= ar
 ARFLAGS = rcs
 
