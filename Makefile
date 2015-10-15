@@ -8,7 +8,7 @@ EXAMPLES = $(patsubst %.cpp,%,$(wildcard examples/*.cpp))
 
 LIB = libdake.a
 
-.PHONY: all clean
+.PHONY: all clean distclean
 
 
 all: $(LIB) $(EXAMPLES)
@@ -23,4 +23,7 @@ examples/%: examples/%.cpp $(LIB)
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LIB) -lm
 
 clean:
-	$(RM) $(OBJECTS) $(LIB) $(EXAMPLES)
+	$(RM) $(OBJECTS) $(EXAMPLES)
+
+distclean: clean
+	$(RM) $(LIB)
