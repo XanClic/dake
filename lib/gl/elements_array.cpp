@@ -29,7 +29,20 @@ dake::gl::elements_array::elements_array(vertex_array *vxa):
 
 dake::gl::elements_array::~elements_array(void)
 {
-    glDeleteBuffers(1, &buffer);
+    if (!buffer_reused) {
+        glDeleteBuffers(1, &buffer);
+    }
+}
+
+
+void dake::gl::elements_array::reuse_buffer(GLuint buffer_id)
+{
+    if (!buffer_reused) {
+        glDeleteBuffers(1, &buffer);
+    }
+
+    buffer = buffer_id;
+    buffer_reused = true;
 }
 
 

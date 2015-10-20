@@ -34,6 +34,7 @@ class vertex_attrib {
         ~vertex_attrib(void);
 
         void reuse_buffer(vertex_attrib *va);
+        void reuse_buffer(GLuint buffer_id);
         void format(int elements_per_vertex, GLenum type = GL_FLOAT);
 
         void load(size_t stride = 0, uintptr_t offset = 0);
