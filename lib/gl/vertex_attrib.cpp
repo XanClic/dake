@@ -62,6 +62,17 @@ void dake::gl::vertex_attrib::reuse_buffer(vertex_attrib *ova)
 }
 
 
+void dake::gl::vertex_attrib::reuse_buffer(GLuint buffer_id)
+{
+    if (!buffer_reused) {
+        glDeleteBuffers(1, &buffer);
+    }
+
+    buffer = buffer_id;
+    buffer_reused = true;
+}
+
+
 #define TYPE(gl, real) case gl: bpv = epv * sizeof(real); break;
 
 void dake::gl::vertex_attrib::format(int elements_per_vertex, GLenum type)

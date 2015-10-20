@@ -21,6 +21,7 @@ extern elements_array *cur_ea;
 class elements_array {
     private:
         GLuint buffer;
+        bool buffer_reused = false;
         vertex_array *va;
         int epv;
         size_t bpv;
@@ -33,6 +34,7 @@ class elements_array {
         elements_array(vertex_array *va);
         ~elements_array(void);
 
+        void reuse_buffer(GLuint buffer_id);
         void format(int elements_per_vertex, GLenum type = GL_UNSIGNED_INT);
 
         void data(void *ptr, size_t size = static_cast<size_t>(-1), GLenum usage = GL_STATIC_DRAW);
