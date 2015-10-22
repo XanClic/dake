@@ -1,3 +1,7 @@
+#include <dake/gl/find_resource.hpp>
+#include <dake/gl/gl.hpp>
+#include <dake/gl/texture.hpp>
+
 #include <cassert>
 #include <cerrno>
 #include <cstdint>
@@ -12,10 +16,6 @@ extern "C" {
 #include <jpeglib.h>
 #include <txc_dxtn.h>
 }
-
-#include <dake/gl/find_resource.hpp>
-#include <dake/gl/gl.hpp>
-#include <dake/gl/texture.hpp>
 
 
 bool test_png(const void *buffer, size_t length)
