@@ -32,7 +32,10 @@ bool dake::gl::glext_info::init(void)
     glGetIntegerv(GL_NUM_EXTENSIONS, &ext_count);
 
     for (int i = 0; i < ext_count; i++) {
-        exts.push_back(reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i)));
+        const GLubyte *ext = glGetStringi(GL_EXTENSIONS, i);
+        if (ext) {
+            exts.push_back(reinterpret_cast<const char *>(ext));
+        }
     }
 
 
