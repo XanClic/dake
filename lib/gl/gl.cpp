@@ -28,12 +28,6 @@ bool dake::gl::glext_info::init(void)
         return true;
     }
 
-#ifdef __MINGW32__
-    if (glewInit() != GLEW_OK) {
-        return false;
-    }
-#endif
-
     GLint ext_count;
     glGetIntegerv(GL_NUM_EXTENSIONS, &ext_count);
 

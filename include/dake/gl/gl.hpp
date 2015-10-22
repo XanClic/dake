@@ -1,23 +1,8 @@
 #ifndef DAKE__GL__GL_HPP
 #define DAKE__GL__GL_HPP
 
-#ifdef __MINGW32__
-extern "C" {
-#include <GL/glew.h>
-}
-#else
-#define GL_GLEXT_PROTOTYPES
-#endif
-
-extern "C" {
-#include <GL/gl.h>
-}
-
-#ifndef __MINGW32__
-extern "C" {
-#include <GL/glext.h>
-}
-#endif
+#include <epoxy/gl.h>
+#include <epoxy/glx.h>
 
 
 #include <string>
