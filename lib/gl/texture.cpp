@@ -35,7 +35,7 @@ void dake::gl::texture::raw_init(void)
     glGenTextures(1, &tex_id);
 
     bind();
-    wrap(GL_CLAMP);
+    wrap(GL_CLAMP_TO_EDGE);
     filter(GL_LINEAR);
 }
 
@@ -272,7 +272,7 @@ dake::gl::array_texture::array_texture(void):
     glGenTextures(1, &tex_id);
 
     bind();
-    wrap(GL_CLAMP);
+    wrap(GL_CLAMP_TO_EDGE);
     filter(GL_LINEAR);
 }
 
@@ -464,7 +464,7 @@ dake::gl::cubemap::cubemap(void):
     glGenTextures(1, &tex_id);
 
     bind();
-    wrap(GL_CLAMP);
+    wrap(GL_CLAMP_TO_EDGE);
     filter(GL_LINEAR);
 }
 
