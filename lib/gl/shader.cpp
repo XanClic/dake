@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 
+#include <dake/math/fmatrix.hpp>
 #include <dake/math/matrix.hpp>
 #include <dake/gl/find_resource.hpp>
 #include <dake/gl/shader.hpp>
@@ -357,6 +358,12 @@ template<> void uniform<math::vec2>::assign(const math::vec2 &value)
 template<> void uniform<math::vec3>::assign(const math::vec3 &value)
 { glUniform3fv(id, 1, value); }
 template<> void uniform<math::vec4>::assign(const math::vec4 &value)
+{ glUniform4fv(id, 1, value); }
+template<> void uniform<math::fvec2>::assign(const math::fvec2 &value)
+{ glUniform2fv(id, 1, value); }
+template<> void uniform<math::fvec3>::assign(const math::fvec3 &value)
+{ glUniform3fv(id, 1, value); }
+template<> void uniform<math::fvec4>::assign(const math::fvec4 &value)
 { glUniform4fv(id, 1, value); }
 template<> void uniform<float>::assign(const float &value)
 { glUniform1f(id, value); }
