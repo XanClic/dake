@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS = -O3 -Wall -Wextra -Wshadow -std=c++11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY -g2
+CXXFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c++14 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY -g2 -fomit-frame-pointer -fno-math-errno -flto -march=native -mtune=native
 AR ?= ar
 ARFLAGS = rcs
 
