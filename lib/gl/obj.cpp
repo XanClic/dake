@@ -122,8 +122,7 @@ dake::gl::obj dake::gl::load_obj(const char *filename)
 
             bool backwards = false;
             if (nrm[0] || nrm[1] || nrm[2]) {
-                // yay for GCC (kind of FIXME, but it's just so nice)
-                dake::math::vec3 *normal = nrm[0] ?: nrm[1] ?: nrm[2];
+                dake::math::vec3 *normal = nrm[0] ? nrm[0] : nrm[1] ? nrm[1] : nrm[2];
 
                 dake::math::vec3 nat_norm = (*pos[1] - *pos[0]).cross(*pos[2] - *pos[0]);
                 backwards = nat_norm.dot(*normal) < 0.f;
