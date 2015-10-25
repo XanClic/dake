@@ -300,9 +300,9 @@ template<int R, int C, typename T> class mat {
 
             for (int i = 0; i < Co; i++) {
                 for (int j = 0; j < R; j++) {
-                    float val = 0.f;
+                    auto val(d[j] * om.d[i * C]);
 
-                    for (int k = 0; k < C; k++) {
+                    for (int k = 1; k < C; k++) {
                         val += d[k * R + j] * om.d[i * C + k];
                     }
 
