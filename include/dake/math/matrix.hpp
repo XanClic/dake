@@ -35,6 +35,10 @@ typedef vec<2, int> vec2i;
 typedef vec<3, int> vec3i;
 typedef vec<4, int> vec4i;
 
+typedef vec<2, double> vec2d;
+typedef vec<3, double> vec3d;
+typedef vec<4, double> vec4d;
+
 typedef mat<2, 2, float> mat2;
 typedef mat<2, 3, float> mat23;
 typedef mat<2, 4, float> mat24;
