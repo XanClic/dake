@@ -501,7 +501,7 @@ template<int R, int C, typename T> class mat {
         mat<Rr, Cr, Tr> ruby_simple_execute(const char *format) const
         {
             char *mat_src = to_ruby();
-            char cmd[strlen(mat_src) + strlen(format) + 1];
+            char *cmd = static_cast<char *>(malloc(strlen(mat_src) + strlen(format) + 1));
 
             sprintf(cmd, format, mat_src);
             free(mat_src);
@@ -512,6 +512,8 @@ template<int R, int C, typename T> class mat {
 #else
             FILE *pfp = popen(cmd, "r");
 #endif
+
+            free(cmd);
 
             char *result = static_cast<char *>(malloc(Rr * Cr * 64));
             size_t fread_res = fread(result, 1, Rr * Cr * 64, pfp);
