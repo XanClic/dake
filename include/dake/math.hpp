@@ -5,6 +5,7 @@
 
 
 #include "dake/math/matrix.hpp"
+#include "dake/math/fmatrix.hpp"
 
 
 #define M_PIf (static_cast<float>(M_PI))
