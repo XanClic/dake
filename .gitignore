@@ -1,0 +1,7 @@
+libdake.a
+**/*.o
+examples/*
+!examples/*.cpp
+.clang_complete
+.hdrdeps
+.syntastic_cpp_config
