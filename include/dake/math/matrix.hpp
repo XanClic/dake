@@ -428,8 +428,8 @@ template<int R, int C, typename T> class mat {
         {
             static_assert(C == 1, "dot() is defined for vectors only");
 
-            decltype(d[0] * ov.d[0]) ret(0);
-            for (int i = 0; i < R; i++) {
+            auto ret(d[0] * ov[0]);
+            for (int i = 1; i < R; i++) {
                 ret += d[i] * ov[i];
             }
 
@@ -440,8 +440,8 @@ template<int R, int C, typename T> class mat {
         {
             static_assert(C == 1, "length() is defined for vectors only");
 
-            _double_default(T) len(0);
-            for (int i = 0; i < R; i++) {
+            _double_default(T) len(d[0] * d[0]);
+            for (int i = 1; i < R; i++) {
                 len += d[i] * d[i];
             }
             return std::sqrt(len);
