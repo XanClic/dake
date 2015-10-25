@@ -3,7 +3,8 @@ CXXFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c++14 -Iinclude -DX86_ASSEM
 AR ?= ar
 ARFLAGS = rcs
 
-OBJECTS = $(patsubst %.cpp,%.o,$(shell find -name '*.cpp' -and -not -path './examples/*'))
+SOURCES = $(shell find -name '*.cpp' -and -not -path './examples/*')
+OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 EXAMPLES = $(patsubst %.cpp,%,$(wildcard examples/*.cpp))
 
 LIB = libdake.a
@@ -16,14 +17,21 @@ all: $(LIB) $(EXAMPLES)
 $(LIB): $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $^
 
-%.o: %.cpp
+%.o: %.cpp Makefile
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 examples/%: examples/%.cpp $(LIB)
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LIB) -lm
 
 clean:
-	$(RM) $(OBJECTS) $(EXAMPLES)
+	$(RM) $(OBJECTS) $(EXAMPLES) .hdrdeps
 
 distclean: clean
 	$(RM) $(LIB)
+
+.hdrdeps: $(SOURCES)
+	$(CXX) $(CXXFLAGS) -MM $^ > $@
+
+.hdrdeps: $(shell find -name '*.hpp' -and -not -path './include/dake/math/fmatrix/*')
+
+-include .hdrdeps
