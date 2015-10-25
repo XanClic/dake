@@ -595,6 +595,15 @@ mat<R, C, _double_default(T)> mat<R, C, T>::svd_Sigma(void) const
 }
 
 
+template<typename MT>
+auto dotp(const MT &v1, const MT &v2) -> decltype(v1.dot(v2))
+{ return v1.dot(v2); }
+
+template<typename MT>
+auto crossp(const MT &v1, const MT &v2) -> decltype(v1.cross(v2))
+{ return v1.cross(v2); }
+
+
 #undef _double_default
 
 }
