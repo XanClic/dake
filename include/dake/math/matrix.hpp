@@ -447,8 +447,8 @@ template<int R, int C, typename T> class mat {
             return std::sqrt(len);
         }
 
-        void normalize(void)
-        { static_assert(C == 1 && std::is_floating_point<T>::value, "normalize() is defined for floating-point vectors only"); *this /= length(); }
+        vec<R, T> &normalize(void)
+        { static_assert(C == 1 && std::is_floating_point<T>::value, "normalize() is defined for floating-point vectors only"); return *this /= length(); }
 
         vec<R, T> normalized(void) const
         { static_assert(C == 1 && std::is_floating_point<T>::value, "normalize() is defined for floating-point vectors only"); return *this / length(); }
