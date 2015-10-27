@@ -353,6 +353,10 @@ template<> void uniform<math::mat3>::assign(const math::mat3 &value)
 { glUniformMatrix3fv(id, 1, false, value); }
 template<> void uniform<math::mat4>::assign(const math::mat4 &value)
 { glUniformMatrix4fv(id, 1, false, value); }
+template<> void uniform<math::fmat3>::assign(const math::fmat3 &value)
+{ glUniformMatrix3fv(id, 1, false, (math::mat3)value); }
+template<> void uniform<math::fmat4>::assign(const math::fmat4 &value)
+{ glUniformMatrix4fv(id, 1, false, value.d); }
 template<> void uniform<math::vec2>::assign(const math::vec2 &value)
 { glUniform2fv(id, 1, value); }
 template<> void uniform<math::vec3>::assign(const math::vec3 &value)
