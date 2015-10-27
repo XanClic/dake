@@ -1,6 +1,8 @@
 #ifndef DAKE__MATH__FMATRIX_HPP
 #define DAKE__MATH__FMATRIX_HPP
 
+#include <cmath>
+
 #include "dake/math/matrix.hpp"
 
 #ifndef __SSE__
@@ -67,6 +69,10 @@ class fvec2d;
 #include "dake/math/fmatrix/fvec3d-standalone.hpp"
 #include "dake/math/fmatrix/fvec2-standalone.hpp"
 #include "dake/math/fmatrix/fvec2d-standalone.hpp"
+
+
+#include "dake/math/fmatrix/fmat4.hpp"
+#include "dake/math/fmatrix/fmat3.hpp"
 
 
 #undef DAKE__MATH__FMATRIX_HPP__INSIDE
