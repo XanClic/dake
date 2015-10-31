@@ -8,11 +8,13 @@ class fvec3d {
         typedef double scalar_type;
         typedef double vector_type __attribute__((vector_size(16)));
 
+        struct vs_type {
+            vector_type v;
+            scalar_type s;
+        } __attribute__((packed));
+
         union {
-            struct {
-                vector_type v;
-                scalar_type s;
-            } __attribute__((packed)) vs;
+            vs_type vs;
             scalar_type d[3];
         };
 
