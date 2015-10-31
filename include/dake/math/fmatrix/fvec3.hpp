@@ -82,14 +82,24 @@ class fvec3 {
         fvec3 operator*(const fvec3 &ov) const { return v * ov.v; }
         fvec3 &operator*=(const fvec3 &ov) { v *= ov.v; return *this; }
 
-        fvec3 operator*(float s) const { return v * s; }
-        fvec3 &operator*=(float s) { v *= s; return *this; }
+#ifdef __clang__
+        fvec3 operator*(float sv) const { return *this * fvec3(sv); }
+        fvec3 &operator*=(float sv) { return *this *= fvec3(sv); }
+#else
+        fvec3 operator*(float sv) const { return v * sv; }
+        fvec3 &operator*=(float sv) { v *= sv; return *this; }
+#endif
 
         fvec3 operator/(const fvec3 &ov) const { return v / ov.v; }
         fvec3 &operator/=(const fvec3 &ov) { v /= ov.v; return *this; }
 
-        fvec3 operator/(float s) const { return v / s; }
-        fvec3 &operator/=(float s) { v /= s; return *this; }
+#ifdef __clang__
+        fvec3 operator/(float sv) const { return *this / fvec3(sv); }
+        fvec3 &operator/=(float sv) { return *this /= fvec3(sv); }
+#else
+        fvec3 operator/(float sv) const { return v / sv; }
+        fvec3 &operator/=(float sv) { v /= sv; return *this; }
+#endif
 
         float dot(const fvec3 &ov) const
         {

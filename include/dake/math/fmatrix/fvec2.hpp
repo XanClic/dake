@@ -73,14 +73,24 @@ class fvec2 {
         fvec2 operator*(const fvec2 &ov) const { return v * ov.v; }
         fvec2 &operator*=(const fvec2 &ov) { v *= ov.v; return *this; }
 
-        fvec2 operator*(float s) const { return v * s; }
-        fvec2 &operator*=(float s) { v *= s; return *this; }
+#ifdef __clang__
+        fvec2 operator*(float sv) const { return *this * fvec2(sv); }
+        fvec2 &operator*=(float sv) { return *this *= fvec2(sv); }
+#else
+        fvec2 operator*(float sv) const { return v * sv; }
+        fvec2 &operator*=(float sv) { v *= sv; return *this; }
+#endif
 
         fvec2 operator/(const fvec2 &ov) const { return v / ov.v; }
         fvec2 &operator/=(const fvec2 &ov) { v /= ov.v; return *this; }
 
-        fvec2 operator/(float s) const { return v / s; }
-        fvec2 &operator/=(float s) { v /= s; return *this; }
+#ifdef __clang__
+        fvec2 operator/(float sv) const { return *this / fvec2(sv); }
+        fvec2 &operator/=(float sv) { return *this /= fvec2(sv); }
+#else
+        fvec2 operator/(float sv) const { return v / sv; }
+        fvec2 &operator/=(float sv) { v /= sv; return *this; }
+#endif
 
         float dot(const fvec2 &ov) const
         {
