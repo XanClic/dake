@@ -84,14 +84,24 @@ class fvec3d {
         fvec3d operator*(const fvec3d &ov) const { return fvec3d(vs.v * ov.vs.v, vs.s * ov.vs.s); }
         fvec3d &operator*=(const fvec3d &ov) { vs.v *= ov.vs.v; vs.s *= ov.vs.s; return *this; }
 
-        fvec3d operator*(double s) const { return fvec3d(vs.v * s, vs.s * s); }
-        fvec3d &operator*=(double s) { vs.v *= s; vs.s *= s; return *this; }
+#ifdef __clang__
+        fvec3d operator*(double sv) const { return *this * fvec3d(sv); }
+        fvec3d &operator*=(double sv) { return *this *= fvec3d(sv); }
+#else
+        fvec3d operator*(double sv) const { return fvec3d(vs.v * sv, vs.s * sv); }
+        fvec3d &operator*=(double sv) { vs.v *= sv; vs.s *= sv; return *this; }
+#endif
 
         fvec3d operator/(const fvec3d &ov) const { return fvec3d(vs.v / ov.vs.v, vs.s / ov.vs.s); }
         fvec3d &operator/=(const fvec3d &ov) { vs.v /= ov.vs.v; vs.s /= ov.vs.s; return *this; }
 
-        fvec3d operator/(double s) const { return fvec3d(vs.v / s, vs.s / s); }
-        fvec3d &operator/=(double s) { vs.v /= s; vs.s /= s; return *this; }
+#ifdef __clang__
+        fvec3d operator/(double sv) const { return *this / fvec3d(sv); }
+        fvec3d &operator/=(double sv) { return *this /= fvec3d(sv); }
+#else
+        fvec3d operator/(double sv) const { return fvec3d(vs.v / sv, vs.s / sv); }
+        fvec3d &operator/=(double sv) { vs.v /= sv; vs.s /= sv; return *this; }
+#endif
 
         double dot(const fvec3d &ov) const
         {

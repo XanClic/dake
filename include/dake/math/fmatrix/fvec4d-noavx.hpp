@@ -93,14 +93,24 @@ class fvec4d {
         fvec4d operator*(const fvec4d &ov) const { return fvec4d(v[0] * ov.v[0], v[1] - ov.v[1]); }
         fvec4d &operator*=(const fvec4d &ov) { v[0] *= ov.v[0]; v[1] *= ov.v[1]; return *this; }
 
-        fvec4d operator*(double s) const { return fvec4d(v[0] * s, v[1] * s); }
-        fvec4d &operator*=(double s) { v[0] *= s; v[1] *= s; return *this; }
+#ifdef __clang__
+        fvec4d operator*(double sv) const { return *this * fvec4d(sv); }
+        fvec4d &operator*=(double sv) { return *this *= fvec4d(sv); }
+#else
+        fvec4d operator*(double sv) const { return fvec4d(v[0] * sv, v[1] * sv); }
+        fvec4d &operator*=(double sv) { v[0] *= sv; v[1] *= sv; return *this; }
+#endif
 
         fvec4d operator/(const fvec4d &ov) const { return fvec4d(v[0] / ov.v[0], v[1] / ov.v[1]); }
         fvec4d &operator/=(const fvec4d &ov) { v[0] /= ov.v[0]; v[1] /= ov.v[1]; return *this; }
 
-        fvec4d operator/(double s) const { return fvec4d(v[0] / s, v[1] / s); }
-        fvec4d &operator/=(double s) { v[0] /= s; v[1] /= s; return *this; }
+#ifdef __clang__
+        fvec4d operator/(double sv) const { return *this / fvec4d(sv); }
+        fvec4d &operator/=(double sv) { return *this /= fvec4d(sv); }
+#else
+        fvec4d operator/(double sv) const { return fvec4d(v[0] / sv, v[1] / sv); }
+        fvec4d &operator/=(double sv) { v[0] /= sv; v[1] /= sv; return *this; }
+#endif
 
         double dot(const fvec4d &ov) const
         {
