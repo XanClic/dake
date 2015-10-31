@@ -162,21 +162,21 @@ class fmat4 {
         {
             fvec4 c2 = cols[1], c3 = cols[2], c4 = cols[3];
 
-            fvec4 r1 = c2.shuffle(1, 0, 0, 0) *
-                       (c3.shuffle(2, 3, 1, 2) *
-                        c4.shuffle(3, 2, 3, 1) -
-                        c3.shuffle(3, 2, 3, 1) *
-                        c4.shuffle(2, 3, 1, 2))
-                     + c2.shuffle(2, 2, 1, 1) *
-                       (c3.shuffle(3, 0, 3, 0) *
-                        c4.shuffle(1, 3, 0, 2) -
-                        c3.shuffle(1, 3, 0, 2) *
-                        c4.shuffle(3, 0, 3, 0))
-                     + c2.shuffle(3, 3, 3, 2);
-                       (c3.shuffle(1, 2, 0, 1) *
-                        c4.shuffle(2, 0, 1, 0) -
-                        c3.shuffle(2, 0, 1, 0) *
-                        c4.shuffle(1, 2, 0, 1));
+            fvec4 r1 = c2.shuffle<1, 0, 0, 0>() *
+                       (c3.shuffle<2, 3, 1, 2>() *
+                        c4.shuffle<3, 2, 3, 1>() -
+                        c3.shuffle<3, 2, 3, 1>() *
+                        c4.shuffle<2, 3, 1, 2>())
+                     + c2.shuffle<2, 2, 1, 1>() *
+                       (c3.shuffle<3, 0, 3, 0>() *
+                        c4.shuffle<1, 3, 0, 2>() -
+                        c3.shuffle<1, 3, 0, 2>() *
+                        c4.shuffle<3, 0, 3, 0>())
+                     + c2.shuffle<3, 3, 3, 2>();
+                       (c3.shuffle<1, 2, 0, 1>() *
+                        c4.shuffle<2, 0, 1, 0>() -
+                        c3.shuffle<2, 0, 1, 0>() *
+                        c4.shuffle<1, 2, 0, 1>());
 
             return dotp(r1, cols[0]);
         }
@@ -186,34 +186,34 @@ class fmat4 {
         {
             fvec4 c1 = cols[0], c2 = cols[1], c3 = cols[2], c4 = cols[3];
 
-            fvec4 c1_1000 = c1.shuffle(1, 0, 0, 0);
-            fvec4 c1_2211 = c1.shuffle(2, 2, 1, 1);
-            fvec4 c1_3332 = c1.shuffle(3, 3, 3, 2);
+            fvec4 c1_1000 = c1.shuffle<1, 0, 0, 0>();
+            fvec4 c1_2211 = c1.shuffle<2, 2, 1, 1>();
+            fvec4 c1_3332 = c1.shuffle<3, 3, 3, 2>();
 
-            fvec4 c2_1000 = c2.shuffle(1, 0, 0, 0);
-            fvec4 c2_2211 = c2.shuffle(2, 2, 1, 1);
-            fvec4 c2_3332 = c2.shuffle(3, 3, 3, 2);
+            fvec4 c2_1000 = c2.shuffle<1, 0, 0, 0>();
+            fvec4 c2_2211 = c2.shuffle<2, 2, 1, 1>();
+            fvec4 c2_3332 = c2.shuffle<3, 3, 3, 2>();
 
-            fvec4 c2_1201 = c2.shuffle(1, 2, 0, 1);
-            fvec4 c2_1302 = c2.shuffle(1, 3, 0, 2);
-            fvec4 c2_2010 = c2.shuffle(2, 0, 1, 0);
-            fvec4 c2_2312 = c2.shuffle(2, 3, 1, 2);
-            fvec4 c2_3030 = c2.shuffle(3, 0, 3, 0);
-            fvec4 c2_3231 = c2.shuffle(3, 2, 3, 1);
+            fvec4 c2_1201 = c2.shuffle<1, 2, 0, 1>();
+            fvec4 c2_1302 = c2.shuffle<1, 3, 0, 2>();
+            fvec4 c2_2010 = c2.shuffle<2, 0, 1, 0>();
+            fvec4 c2_2312 = c2.shuffle<2, 3, 1, 2>();
+            fvec4 c2_3030 = c2.shuffle<3, 0, 3, 0>();
+            fvec4 c2_3231 = c2.shuffle<3, 2, 3, 1>();
 
-            fvec4 c3_1201 = c3.shuffle(1, 2, 0, 1);
-            fvec4 c3_1302 = c3.shuffle(1, 3, 0, 2);
-            fvec4 c3_2010 = c3.shuffle(2, 0, 1, 0);
-            fvec4 c3_2312 = c3.shuffle(2, 3, 1, 2);
-            fvec4 c3_3030 = c3.shuffle(3, 0, 3, 0);
-            fvec4 c3_3231 = c3.shuffle(3, 2, 3, 1);
+            fvec4 c3_1201 = c3.shuffle<1, 2, 0, 1>();
+            fvec4 c3_1302 = c3.shuffle<1, 3, 0, 2>();
+            fvec4 c3_2010 = c3.shuffle<2, 0, 1, 0>();
+            fvec4 c3_2312 = c3.shuffle<2, 3, 1, 2>();
+            fvec4 c3_3030 = c3.shuffle<3, 0, 3, 0>();
+            fvec4 c3_3231 = c3.shuffle<3, 2, 3, 1>();
 
-            fvec4 c4_1201 = c4.shuffle(1, 2, 0, 1);
-            fvec4 c4_1302 = c4.shuffle(1, 3, 0, 2);
-            fvec4 c4_2010 = c4.shuffle(2, 0, 1, 0);
-            fvec4 c4_2312 = c4.shuffle(2, 3, 1, 2);
-            fvec4 c4_3030 = c4.shuffle(3, 0, 3, 0);
-            fvec4 c4_3231 = c4.shuffle(3, 2, 3, 1);
+            fvec4 c4_1201 = c4.shuffle<1, 2, 0, 1>();
+            fvec4 c4_1302 = c4.shuffle<1, 3, 0, 2>();
+            fvec4 c4_2010 = c4.shuffle<2, 0, 1, 0>();
+            fvec4 c4_2312 = c4.shuffle<2, 3, 1, 2>();
+            fvec4 c4_3030 = c4.shuffle<3, 0, 3, 0>();
+            fvec4 c4_3231 = c4.shuffle<3, 2, 3, 1>();
 
             fvec4 oc1 = (c2_1000 * (c3_2312 * c4_3231 - c3_3231 * c4_2312)
                        + c2_2211 * (c3_3030 * c4_1302 - c3_1302 * c4_3030)

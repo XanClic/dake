@@ -112,8 +112,8 @@ class fmat3 {
         {
             fvec3 c1 = cols[0], c2 = cols[1], c3 = cols[2];
 
-            return dotp(c3.shuffle(2, 1, 0), c2.shuffle(1, 0, 2) * c1.shuffle(0, 2, 1)) -
-                   dotp(c1,                  c2.shuffle(2, 0, 1) * c3.shuffle(1, 2, 0));
+            return dotp(c3.shuffle<2, 1, 0>(), c2.shuffle<1, 0, 2>() * c1.shuffle<0, 2, 1>()) -
+                   dotp(c1,                    c2.shuffle<2, 0, 1>() * c3.shuffle<1, 2, 0>());
         }
 
 
@@ -121,14 +121,14 @@ class fmat3 {
         {
             fvec3 c1 = cols[0], c2 = cols[1], c3 = cols[2];
 
-            fvec3 c1_120 = c1.shuffle(1, 2, 0);
-            fvec3 c1_201 = c1.shuffle(2, 0, 1);
+            fvec3 c1_120 = c1.shuffle<1, 2, 0>();
+            fvec3 c1_201 = c1.shuffle<2, 0, 1>();
 
-            fvec3 c2_120 = c2.shuffle(1, 2, 0);
-            fvec3 c2_201 = c2.shuffle(2, 0, 1);
+            fvec3 c2_120 = c2.shuffle<1, 2, 0>();
+            fvec3 c2_201 = c2.shuffle<2, 0, 1>();
 
-            fvec3 c3_120 = c3.shuffle(1, 2, 0);
-            fvec3 c3_201 = c3.shuffle(2, 0, 1);
+            fvec3 c3_120 = c3.shuffle<1, 2, 0>();
+            fvec3 c3_201 = c3.shuffle<2, 0, 1>();
 
             fvec3 oc1 = c2_120 * c3_201 - c3_120 * c2_201;
             fvec3 oc2 = c3_120 * c1_201 - c1_120 * c3_201;

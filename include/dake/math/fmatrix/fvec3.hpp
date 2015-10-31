@@ -116,12 +116,17 @@ class fvec3 {
         fvec3 approx_normalized(void) const { return *this * approx_rcp_length(); }
         fvec3 &approx_normalize(void) { return *this *= approx_rcp_length(); }
 
+#ifdef __clang__
+        template<int xi, int yi, int zi> fvec3 shuffle(void) const
+        { return __builtin_shufflevector(v, v, xi, yi, zi, 3); }
+#else
         // Note: When calling this, iv[3] *must* be 3
         fvec3 shuffle(const int_vector_type iv) const
         { return __builtin_shuffle(v, iv); }
 
-        fvec3 shuffle(int x, int y, int z) const
-        { return __builtin_shuffle(v, int_vector_type {x, y, z, 3}); }
+        template<int xi, int yi, int zi> fvec3 shuffle(void) const
+        { return __builtin_shuffle(v, int_vector_type {xi, yi, zi, 3}); }
+#endif
 
         bool operator==(fvec3 &ov) const
         { return v[0] == ov[0] && v[1] == ov[1] && v[2] == ov[2]; }
