@@ -139,7 +139,7 @@ class fmat3 {
         }
 
         fmat3 &transposed_invert(void)
-        { return *this = transposed_invert(); }
+        { return *this = transposed_inverse(); }
 
 
         fmat3 inverse(void) const
