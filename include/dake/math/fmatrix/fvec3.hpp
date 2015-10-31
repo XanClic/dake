@@ -17,9 +17,9 @@ class fvec3 {
 
         fvec3(float xv, float yv, float zv): v {xv, yv, zv, 0.f} {}
         fvec3(float val): v {val, val, val} {}
-        fvec3(const fvec3 &ov): v {ov.v} {}
-        fvec3(const fvec4 &ov): v {ov.v} { v[3] = 0.f; }
-        fvec3(const vector_type &ov): v{ov} { v[3] = 0.f; }
+        fvec3(const fvec3 &ov): v(ov.v) {}
+        fvec3(const fvec4 &ov): v(ov.v) { v[3] = 0.f; }
+        fvec3(const vector_type &ov): v(ov) { v[3] = 0.f; }
         fvec3(const vec3 &ov): v {ov.d[0], ov.d[1], ov.d[2], 0.f} {}
         fvec3(void) {}
 

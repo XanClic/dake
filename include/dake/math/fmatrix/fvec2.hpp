@@ -16,10 +16,10 @@ class fvec2 {
 
         fvec2(float xv, float yv): v {xv, yv} {}
         fvec2(float val): v {val, val} {}
-        fvec2(const fvec2 &ov): v {ov.v} {}
+        fvec2(const fvec2 &ov): v(ov.v) {}
         fvec2(const fvec3 &ov): v {ov.v[0], ov.v[1]} {}
         fvec2(const fvec4 &ov): v {ov.v[0], ov.v[1]} {}
-        fvec2(const vector_type &ov): v{ov} {}
+        fvec2(const vector_type &ov): v(ov) {}
         fvec2(const vec2 &ov): v {ov.d[0], ov.d[1]} {}
         fvec2(void) {}
 
