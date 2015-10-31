@@ -236,7 +236,7 @@ class fmat4 {
         }
 
         fmat4 &transposed_invert(void)
-        { return *this = transposed_invert(); }
+        { return *this = transposed_inverse(); }
 
 
         fmat4 inverse(void) const
