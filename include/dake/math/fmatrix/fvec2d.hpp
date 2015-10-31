@@ -16,18 +16,18 @@ class fvec2d {
 
         fvec2d(double xv, double yv): v {xv, yv} {}
         fvec2d(double val): v {val, val} {}
-        fvec2d(const fvec2d &ov): v {ov.v} {}
+        fvec2d(const fvec2d &ov): v(ov.v) {}
 #ifdef __AVX__
         fvec2d(const fvec3d &ov): v {ov.v[0], ov.v[1]} {}
         fvec2d(const fvec4d &ov): v {ov.v[0], ov.v[1]} {}
 #else
-        fvec2d(const fvec3d &ov): v {ov.vs.v} {}
-        fvec2d(const fvec4d &ov): v {ov.v[0]} {}
+        fvec2d(const fvec3d &ov): v(ov.vs.v) {}
+        fvec2d(const fvec4d &ov): v(ov.v[0]) {}
 #endif
         fvec2d(const fvec2 &ov): v {ov.v[0], ov.v[1]} {}
         fvec2d(const fvec3 &ov): v {ov.v[0], ov.v[1]} {}
         fvec2d(const fvec4 &ov): v {ov.v[0], ov.v[1]} {}
-        fvec2d(const vector_type &ov): v{ov} {}
+        fvec2d(const vector_type &ov): v(ov) {}
         fvec2d(const vec2d &ov): v {ov.d[0], ov.d[1]} {}
         fvec2d(void) {}
 

@@ -17,8 +17,8 @@ class fvec4 {
 
         fvec4(float xv, float yv, float zv, float wv): v {xv, yv, zv, wv} {}
         fvec4(float val): v {val, val, val, val} {}
-        fvec4(const fvec4 &ov): v {ov.v} {}
-        fvec4(const vector_type &ov): v{ov} {}
+        fvec4(const fvec4 &ov): v(ov.v) {}
+        fvec4(const vector_type &ov): v(ov) {}
         fvec4(const vec4 &ov): v {ov.d[0], ov.d[1], ov.d[2], ov.d[3]} {}
         fvec4(void) {}
 

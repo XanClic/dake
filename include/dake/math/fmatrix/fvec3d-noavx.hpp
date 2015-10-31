@@ -19,11 +19,11 @@ class fvec3d {
 
         fvec3d(double xv, double yv, double zv): vs {{xv, yv}, zv} {}
         fvec3d(double val): vs {{val, val}, val} {}
-        fvec3d(const fvec3d &ov): vs {{ov.vs.v}, ov.vs.s} {}
+        fvec3d(const fvec3d &ov): vs {ov.vs.v, ov.vs.s} {}
         fvec3d(const fvec4d &ov): vs {{ov.v[0][0], ov.v[0][1]}, ov.v[1][0]} {}
         fvec3d(const fvec3 &ov): vs {{ov.v[0], ov.v[1]}, ov.v[2]} {}
         fvec3d(const fvec4 &ov): vs {{ov.v[0], ov.v[1]}, ov.v[2]} {}
-        fvec3d(const vector_type &xyv, double zv): vs {{xyv}, zv} {}
+        fvec3d(const vector_type &xyv, double zv): vs {xyv, zv} {}
         fvec3d(const vec3d &ov): vs {{ov.d[0], ov.d[1]}, ov.d[2]} {}
         fvec3d(void) {}
 

@@ -16,9 +16,9 @@ class fvec4d {
 
         fvec4d(double xv, double yv, double zv, double wv): v {xv, yv, zv, wv} {}
         fvec4d(double val): v {val, val, val, val} {}
-        fvec4d(const fvec4d &ov): v {ov.v} {}
+        fvec4d(const fvec4d &ov): v(ov.v) {}
         fvec4d(const fvec4 &ov): v {ov.v[0], ov.v[1], ov.v[2], ov.v[3]} {}
-        fvec4d(const vector_type &ov): v{ov} {}
+        fvec4d(const vector_type &ov): v(ov) {}
         fvec4d(const vec4 &ov): v {ov.d[0], ov.d[1], ov.d[2], ov.d[3]} {}
         fvec4d(void);
 

@@ -16,11 +16,11 @@ class fvec3d {
 
         fvec3d(double xv, double yv, double zv): v {xv, yv, zv, 0.} {}
         fvec3d(double val): v {val, val, val} {}
-        fvec3d(const fvec3d &ov): v {ov.v} {}
-        fvec3d(const fvec4d &ov): v {ov.v} { v[3] = 0.; }
+        fvec3d(const fvec3d &ov): v(ov.v) {}
+        fvec3d(const fvec4d &ov): v(ov.v) { v[3] = 0.; }
         fvec3d(const fvec3 &ov): v {ov.v[0], ov.v[1], ov.v[2], 0.} {}
         fvec3d(const fvec4 &ov): v {ov.v[0], ov.v[1], ov.v[2], 0.} {}
-        fvec3d(const vector_type &ov): v{ov} { v[3] = 0.; }
+        fvec3d(const vector_type &ov): v(ov) { v[3] = 0.; }
         fvec3d(const vec3 &ov): v {ov.d[0], ov.d[1], ov.d[2], 0.} {}
         fvec3d(void) {}
 
