@@ -94,7 +94,8 @@ void dake::gl::vertex_array::draw(GLenum type, int start_index)
 
     if (index_buffer) {
         index_buffer->bind();
-        glDrawElements(type, n, index_buffer->t, nullptr);
+        glDrawElements(type, n, index_buffer->t,
+                       reinterpret_cast<const void *>(index_buffer->offset));
     } else {
         dake::gl::elements_array::unbind();
         glDrawArrays(type, start_index, n);

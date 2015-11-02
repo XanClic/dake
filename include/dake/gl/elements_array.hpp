@@ -26,6 +26,7 @@ class elements_array {
         int epv;
         size_t bpv;
         GLenum t;
+        uintptr_t offset = 0;
 
         friend class vertex_array;
 
@@ -36,6 +37,8 @@ class elements_array {
 
         void reuse_buffer(GLuint buffer_id);
         void format(int elements_per_vertex, GLenum type = GL_UNSIGNED_INT);
+
+        void set_offset(uintptr_t offset);
 
         void data(void *ptr, size_t size = static_cast<size_t>(-1), GLenum usage = GL_STATIC_DRAW);
 

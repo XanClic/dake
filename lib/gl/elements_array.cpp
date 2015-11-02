@@ -71,6 +71,12 @@ void dake::gl::elements_array::bind(void)
 }
 
 
+void dake::gl::elements_array::set_offset(uintptr_t off)
+{
+    offset = off;
+}
+
+
 void dake::gl::elements_array::data(void *ptr, size_t size, GLenum usage)
 {
     if (size == static_cast<size_t>(-1)) {
