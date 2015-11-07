@@ -33,6 +33,7 @@ class image {
         void load(const void *buffer, size_t length, const std::string &name);
 
     public:
+        image(const image &copy);
         image(const std::string &file);
         image(const void *buffer, size_t length);
         image(const image &i1, const image &i2);
