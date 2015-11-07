@@ -439,23 +439,28 @@ static const GLenum gl_types[] = {
 
 dake::gl::image::image(const dake::gl::image &input, channel_format new_format, int new_channels)
 {
+    int stride;
+
     if (!new_channels) {
         new_channels = input.channels();
     }
 
     switch (new_format) {
         case LINEAR_UINT8:
-            bsz = input.width() * input.height() * new_channels;
+            stride = (input.width() * new_channels + 3) & ~3u;
+            bsz = input.height() * stride;
             break;
 
         case COMPRESSED_S3TC_DXT1:
         case COMPRESSED_S3TC_DXT1_ALPHA:
-            bsz = ((input.width() + 3) / 4) * ((input.height() + 3) / 4) * 8;
+            stride = ((input.width() + 3) / 4) * 8;
+            bsz = ((input.height() + 3) / 4) * stride;
             break;
 
         case COMPRESSED_S3TC_DXT3:
         case COMPRESSED_S3TC_DXT5:
-            bsz = ((input.width() + 3) / 4) * ((input.height() + 3) / 4) * 16;
+            stride = ((input.width() + 3) / 4) * 16;
+            bsz = ((input.height() + 3) / 4) * stride;
             break;
 
         default:
@@ -483,12 +488,20 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
             const uint8_t *inp = static_cast<const uint8_t *>(input.data());
             uint8_t *outp = static_cast<uint8_t *>(d);
 
-            for (int i = 0; i < w * h; i++) {
-                for (int c = 0; c < cc; c++) {
-                    *(outp++) = (c < input.channels() ? *(inp++) : 0);
-                }
-                for (int c = 0; c < input.channels() - cc; c++) {
-                    inp++;
+            const uint8_t *inp_start = inp;
+            uint8_t *outp_start = outp;
+
+            for (int y = 0; y < h; y++) {
+                inp = inp_start + ((inp - inp_start + 3) & ~3u);
+                outp = outp_start + ((outp - outp_start + 3) & ~3u);
+
+                for (int x = 0; x < w; x++) {
+                    for (int c = 0; c < cc; c++) {
+                        *(outp++) = (c < input.channels() ? *(inp++) : 0);
+                    }
+                    for (int c = 0; c < input.channels() - cc; c++) {
+                        inp++;
+                    }
                 }
             }
         }
@@ -502,7 +515,7 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
 
         d = new uint8_t[bsz];
         tx_compress_dxtn(input.channels(), w, h, static_cast<const uint8_t *>(input.data()), gl_types[fmt],
-                         static_cast<uint8_t *>(d), 0);
+                         static_cast<uint8_t *>(d), stride);
     } else {
         throw std::invalid_argument("Recompression is not supported");
     }
