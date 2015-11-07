@@ -505,8 +505,8 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
             uint8_t *outp_start = outp;
 
             for (int y = 0; y < h; y++) {
-                inp = inp_start + ((inp - inp_start + 3) & ~3u);
-                outp = outp_start + ((outp - outp_start + 3) & ~3u);
+                inp = inp_start + ((inp - inp_start + 3) & ~3ul);
+                outp = outp_start + ((outp - outp_start + 3) & ~3ul);
 
                 for (int x = 0; x < w; x++) {
                     for (int c = 0; c < cc; c++) {
@@ -612,5 +612,42 @@ bool dake::gl::image::compressed(void) const
 
         default:
             abort();
+    }
+}
+
+
+void dake::gl::image::swap_channels(int r, int g, int b, int a)
+{
+    if (fmt != LINEAR_UINT8) {
+        throw std::runtime_error("Cannot swap color channels of compressed "
+                                 "images");
+    }
+
+    int tc[4] = { r, g, b, a };
+
+    for (int i = 0; i < 4; i++) {
+        if (i < cc) {
+            assert(tc[i] >= 0 && tc[i] < cc);
+        } else {
+            assert(tc[i] < 0);
+        }
+    }
+
+    uint8_t *base = static_cast<uint8_t *>(d), *ptr = base;
+    uint8_t src[4] = { 0 };
+
+    for (int y = 0; y < h; y++) {
+        ptr = base + ((ptr - base + 3) & ~3ul);
+
+        for (int x = 0; x < w; x++) {
+            for (int c = 0; c < cc; c++) {
+                src[c] = ptr[tc[c]];
+            }
+            for (int c = 0; c < cc; c++) {
+                ptr[c] = src[c];
+            }
+
+            ptr += cc;
+        }
     }
 }

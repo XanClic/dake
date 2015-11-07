@@ -47,6 +47,8 @@ class image {
         const void *data(void) const { return d; }
         size_t byte_size(void) const { return bsz; }
 
+        void swap_channels(int r, int g = -1, int b = -1, int a = -1);
+
         GLenum gl_format(void) const;
         GLenum gl_type(void) const;
 
