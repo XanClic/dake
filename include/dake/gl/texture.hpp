@@ -22,6 +22,8 @@ class image {
             COMPRESSED_S3TC_DXT1_ALPHA,
             COMPRESSED_S3TC_DXT3,
             COMPRESSED_S3TC_DXT5,
+            COMPRESSED_RGTC_RED,
+            COMPRESSED_RGTC_RG,
         };
 
     private:
