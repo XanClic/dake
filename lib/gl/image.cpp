@@ -447,6 +447,8 @@ static const GLenum gl_types[] = {
     GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, // COMPRESSED_S3TC_DXT1_ALPHA
     GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, // COMPRESSED_S3TC_DXT3
     GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, // COMPRESSED_S3TC_DXT5
+    GL_COMPRESSED_RED_RGTC1,          // COMPRESSED_RGTC_RED
+    GL_COMPRESSED_RG_RGTC2,           // COMPRESSED_RGTC_RG
 };
 
 
@@ -466,12 +468,14 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
 
         case COMPRESSED_S3TC_DXT1:
         case COMPRESSED_S3TC_DXT1_ALPHA:
+        case COMPRESSED_RGTC_RED:
             stride = ((input.width() + 3) / 4) * 8;
             bsz = ((input.height() + 3) / 4) * stride;
             break;
 
         case COMPRESSED_S3TC_DXT3:
         case COMPRESSED_S3TC_DXT5:
+        case COMPRESSED_RGTC_RG:
             stride = ((input.width() + 3) / 4) * 16;
             bsz = ((input.height() + 3) / 4) * stride;
             break;
@@ -524,11 +528,66 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
         fmt = new_format;
         w = input.width();
         h = input.height();
-        cc = (new_format == COMPRESSED_S3TC_DXT1) ? 3 : 4;
+
+        if (new_format == COMPRESSED_RGTC_RED) {
+            cc = 1;
+        } else if (new_format == COMPRESSED_RGTC_RG) {
+            cc = 2;
+        } else if (new_format == COMPRESSED_S3TC_DXT1) {
+            cc = 3;
+        } else {
+            cc = 4;
+        }
 
         d = new uint8_t[bsz];
-        tx_compress_dxtn(input.channels(), w, h, static_cast<const uint8_t *>(input.data()), gl_types[fmt],
-                         static_cast<uint8_t *>(d), stride);
+        if (new_format == COMPRESSED_S3TC_DXT1 ||
+            new_format == COMPRESSED_S3TC_DXT1_ALPHA ||
+            new_format == COMPRESSED_S3TC_DXT3 ||
+            new_format == COMPRESSED_S3TC_DXT5)
+        {
+            tx_compress_dxtn(input.channels(), w, h,
+                             static_cast<const uint8_t *>(input.data()),
+                             gl_types[fmt], static_cast<uint8_t *>(d), stride);
+        } else if (new_format == COMPRESSED_RGTC_RED) {
+            // FIXME
+            uint64_t *dest_ptr = static_cast<uint64_t *>(d);
+
+            image rgba_image(input, LINEAR_UINT8, 4);
+            rgba_image.swap_channels(0, 1, 2, 0);
+
+            image compressed_rgba(rgba_image, COMPRESSED_S3TC_DXT5);
+            const uint64_t *src_ptr =
+                static_cast<const uint64_t *>(compressed_rgba.data());
+
+            for (size_t i = 0; i < compressed_rgba.bsz / 16; i++) {
+                dest_ptr[i] = src_ptr[i * 2];
+            }
+        } else if (new_format == COMPRESSED_RGTC_RG) {
+            // FIXME
+            uint64_t *dest_ptr = static_cast<uint64_t *>(d);
+
+            image rgba_image_r(input, LINEAR_UINT8, 4);
+            image rgba_image_g(rgba_image_r);
+
+            rgba_image_r.swap_channels(0, 1, 2, 0);
+            rgba_image_g.swap_channels(0, 1, 2, 1);
+
+            image compressed_rgba_r(rgba_image_r, COMPRESSED_S3TC_DXT5);
+            image compressed_rgba_g(rgba_image_g, COMPRESSED_S3TC_DXT5);
+            const uint64_t *src_ptr;
+
+            src_ptr = static_cast<const uint64_t *>(compressed_rgba_r.data());
+            for (size_t i = 0; i < compressed_rgba_r.bsz / 16; i++) {
+                dest_ptr[i * 2 + 0] = src_ptr[i * 2];
+            }
+
+            src_ptr = static_cast<const uint64_t *>(compressed_rgba_g.data());
+            for (size_t i = 0; i < compressed_rgba_g.bsz / 16; i++) {
+                dest_ptr[i * 2 + 1] = src_ptr[i * 2];
+            }
+        } else {
+            abort();
+        }
     } else {
         throw std::invalid_argument("Recompression is not supported");
     }
@@ -608,6 +667,8 @@ bool dake::gl::image::compressed(void) const
         case COMPRESSED_S3TC_DXT1_ALPHA:
         case COMPRESSED_S3TC_DXT3:
         case COMPRESSED_S3TC_DXT5:
+        case COMPRESSED_RGTC_RED:
+        case COMPRESSED_RGTC_RG:
             return true;
 
         default:
