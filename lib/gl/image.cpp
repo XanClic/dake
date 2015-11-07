@@ -389,6 +389,19 @@ dake::gl::image::image(const void *buffer, size_t length)
 }
 
 
+dake::gl::image::image(const dake::gl::image &copy)
+{
+    w = copy.width();
+    h = copy.height();
+    cc = copy.channels();
+    fmt = copy.format();
+    bsz = copy.byte_size();
+
+    d = new uint8_t[bsz];
+    memcpy(d, copy.data(), bsz);
+}
+
+
 dake::gl::image::image(const dake::gl::image &i1, const dake::gl::image &i2)
 {
     if (i1.channels() + i2.channels() > 4) {
