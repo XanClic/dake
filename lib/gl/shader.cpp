@@ -29,7 +29,7 @@ dake::gl::shader::shader(GLint tp, GLuint glid):
 
 
 dake::gl::shader::shader(dake::gl::shader::type tp, const char *src_file):
-    t(tp), name(src_file)
+    t(tp)
 {
     id = glCreateShader(tp);
     if (!id) {
@@ -38,6 +38,9 @@ dake::gl::shader::shader(dake::gl::shader::type tp, const char *src_file):
 
     if (src_file) {
         load(src_file);
+        name = src_file;
+    } else {
+        name = "(unnamed)";
     }
 }
 
@@ -52,7 +55,7 @@ dake::gl::shader::shader(dake::gl::shader &&sh)
     sh.t = 0;
     sh.id = 0;
     sh.compiled = false;
-    sh.name = "unnamed";
+    sh.name = "(unnamed)";
 }
 
 
