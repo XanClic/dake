@@ -1,3 +1,4 @@
+#include <dake/helper/function.hpp>
 #include <dake/gl/find_resource.hpp>
 #include <dake/gl/gl.hpp>
 #include <dake/gl/texture.hpp>
@@ -18,9 +19,33 @@ extern "C" {
 }
 
 
+using namespace dake::helper;
+
+
 bool test_png(const void *buffer, size_t length)
 {
     return png_sig_cmp(static_cast<png_const_bytep>(buffer), 0, length < 8 ? length : 8) == 0;
+}
+
+
+struct PNGIOState {
+    const uint8_t *buffer;
+    size_t offset;
+    size_t length;
+};
+
+
+static void buffer_load(png_structp png_ptr, png_bytep out, png_size_t length)
+{
+    PNGIOState *ios = static_cast<PNGIOState *>(png_get_io_ptr(png_ptr));
+
+    size_t eff_length = ios->offset >= ios->length ? 0 :
+                        minimum(ios->length - ios->offset, length);
+
+    memcpy(out, ios->buffer + ios->offset, eff_length);
+    memset(out + eff_length, 0, length - eff_length);
+
+    ios->offset += eff_length;
 }
 
 
@@ -28,32 +53,30 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
 {
     // lol longjmp
 
-    FILE *fp = fmemopen(const_cast<void *>(buffer), length, "rb");
-    if (!fp) {
-        throw std::runtime_error("Could not open PNG buffer for reading");
-    }
-
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (!png_ptr) {
-        fclose(fp);
         throw std::runtime_error("Could not create PNG read struct");
     }
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
         png_destroy_read_struct(&png_ptr, nullptr, nullptr);
-        fclose(fp);
         throw std::runtime_error("Could not create PNG info struct");
     }
 
     png_infop info_end = png_create_info_struct(png_ptr);
     if (!info_end) {
         png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
-        fclose(fp);
         throw std::runtime_error("Could not create PNG end info struct");
     }
 
-    png_init_io(png_ptr, fp);
+    struct PNGIOState pngios = {
+        static_cast<const uint8_t *>(buffer),
+        0,
+        length
+    };
+    png_set_read_fn(png_ptr, &pngios, buffer_load);
+    png_set_sig_bytes(png_ptr, 0);
 
     png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, nullptr);
 
@@ -73,7 +96,6 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
         case PNG_COLOR_TYPE_RGB_ALPHA:  *channels = 4; break;
         default:
             png_destroy_read_struct(&png_ptr, &info_ptr, &info_end);
-            fclose(fp);
             throw std::runtime_error("Unknown PNG color format");
     }
 
@@ -103,7 +125,6 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
     }
 
     png_destroy_read_struct(&png_ptr, &info_ptr, &info_end);
-    fclose(fp);
 
     return output;
 }
@@ -249,20 +270,17 @@ bool test_jpg(const void *buffer, size_t length)
 {
     jpeg_decompress_struct cinfo;
     jpeg_error_mgr jpg_err;
-    FILE *fp = fmemopen(const_cast<void *>(buffer), length, "rb");
-    if (!fp) {
-        return false;
-    }
 
     cinfo.err = jpeg_std_error(&jpg_err);
 
     jpeg_create_decompress(&cinfo);
-    jpeg_stdio_src(&cinfo, fp);
+
+    uint8_t *mutilated = static_cast<uint8_t *>(const_cast<void *>(buffer));
+    jpeg_mem_src(&cinfo, mutilated, length);
 
     bool success = jpeg_read_header(&cinfo, true);
 
     jpeg_destroy_decompress(&cinfo);
-    fclose(fp);
 
     return success;
 }
@@ -272,22 +290,19 @@ void *load_jpg(const void *buffer, size_t length, int *width, int *height, int *
 {
     jpeg_decompress_struct cinfo;
     jpeg_error_mgr jpg_err;
-    FILE *fp = fmemopen(const_cast<void *>(buffer), length, "rb");
-    if (!fp) {
-        throw std::runtime_error("Could not open JPEG buffer for reading");
-    }
 
     cinfo.err = jpeg_std_error(&jpg_err);
 
     jpeg_create_decompress(&cinfo);
-    jpeg_stdio_src(&cinfo, fp);
+
+    uint8_t *mutilated = static_cast<uint8_t *>(const_cast<void *>(buffer));
+    jpeg_mem_src(&cinfo, mutilated, length);
 
     jpeg_read_header(&cinfo, true);
     jpeg_start_decompress(&cinfo);
 
     if ((cinfo.output_components < 1) || (cinfo.output_components > 4)) {
         jpeg_destroy_decompress(&cinfo);
-        fclose(fp);
         throw std::runtime_error("Invalid number of JPEG color channels");
     }
 
@@ -305,7 +320,6 @@ void *load_jpg(const void *buffer, size_t length, int *width, int *height, int *
 
     jpeg_finish_decompress(&cinfo);
     jpeg_destroy_decompress(&cinfo);
-    fclose(fp);
 
     return output;
 }
