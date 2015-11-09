@@ -1,7 +1,9 @@
+TARGET_ARCHITECTURE ?= native
+
 CXX = g++
 CC = gcc
-CXXFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c++14 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY -g2 -fomit-frame-pointer -fno-math-errno -flto -march=native -mtune=native
-CFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY -g2 -fomit-frame-pointer -fno-math-errno -flto -march=native -mtune=native
+CXXFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c++14 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY -g2 -fomit-frame-pointer -fno-math-errno -flto -march=$(TARGET_ARCHITECTURE) -mtune=$(TARGET_ARCHITECTURE)
+CFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c11 -Iinclude -DX86_ASSEMBLY -DX64_ASSEMBLY -g2 -fomit-frame-pointer -fno-math-errno -flto -march=$(TARGET_ARCHITECTURE) -mtune=$(TARGET_ARCHITECTURE)
 AR = gcc-ar
 ARFLAGS = rcs
 
