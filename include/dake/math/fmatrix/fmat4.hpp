@@ -135,15 +135,15 @@ class fmat4 {
         }
 
 
-        static fmat4 orthographic(float left, float right, float top,
-                                  float bottom, float near, float far)
+        static fmat4 orthographic(float xleft, float xright, float ytop,
+                                  float ybottom, float znear, float zfar)
         {
-            return fmat4(fvec4(2.f / (right - left), 0.f, 0.f, 0.f),
-                         fvec4(0.f, 2.f / (top - bottom), 0.f, 0.f),
-                         fvec4(0.f, 0.f, 2.f / (near - far), 0.f),
-                         fvec4((right + left) / (left - right),
-                               (top + bottom) / (bottom - top),
-                               (far + near) / (near - far),
+            return fmat4(fvec4(2.f / (xright - xleft), 0.f, 0.f, 0.f),
+                         fvec4(0.f, 2.f / (ytop - ybottom), 0.f, 0.f),
+                         fvec4(0.f, 0.f, 2.f / (znear - zfar), 0.f),
+                         fvec4((xright + xleft) / (xleft - xright),
+                               (ytop + ybottom) / (ybottom - ytop),
+                               (zfar + znear) / (znear - zfar),
                                1.f));
         }
 
