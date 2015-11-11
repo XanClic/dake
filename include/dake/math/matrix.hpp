@@ -170,8 +170,11 @@ template<int R, int C, typename T> class mat {
             return i;
         }
 
-        static mat<R, C, T> from_data(const T *f)
-        { mat<R, C, T> m; memcpy(m.d, f, sizeof(m.d)); return m; }
+        static mat<R, C, T> &from_data(T *f)
+        { return *reinterpret_cast<mat<R, C, T> *>(f); }
+
+        static const mat<R, C, T> &from_data(const T *f)
+        { return *reinterpret_cast<const mat<R, C, T> *>(f); }
 
         template<class...Tv, typename std::enable_if<R == C && sizeof...(Tv) == C, int>::type = 0>
         static mat<R, C, T> diagonal(Tv... vals)
