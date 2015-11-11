@@ -545,19 +545,6 @@ template<int R, int C, typename T> class mat {
 };
 
 
-template<> template<> mat2 mat2::operator*(const mat2 &om) const;
-template<> template<> mat3 mat3::operator*(const mat3 &om) const;
-template<> template<> mat4 mat4::operator*(const mat4 &om) const;
-
-template<> mat2 &mat2::operator*=(const mat2 &om);
-template<> mat3 &mat3::operator*=(const mat3 &om);
-template<> mat4 &mat4::operator*=(const mat4 &om);
-
-template<> template<> vec2 mat2::operator*(const vec2 &v) const;
-template<> template<> vec3 mat3::operator*(const vec3 &v) const;
-template<> template<> vec4 mat4::operator*(const vec4 &v) const;
-
-
 template<int R, int C, typename T> static mat<R, C, T> operator*(T lhs, const mat<R, C, T> &rhs)
 { return rhs * lhs; }
 

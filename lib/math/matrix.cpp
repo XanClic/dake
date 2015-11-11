@@ -5,263 +5,30 @@
 #include <dake/math/matrix.hpp>
 
 
-#ifdef __GNUC__
-// #define X64_ASSEMBLY
-// #define X86_ASSEMBLY
-#endif
-
-
 namespace dake
 {
 namespace math
 {
 
-static void mult_mat4(float *d, const float *s1, const float *s2)
-{
-#ifdef X64_ASSEMBLY
-    __asm__ __volatile__ (
-            "movups  0(%1),%%xmm0;"
-            // xmm0  = (a30, a20, a10, a00)
-            "movups 16(%1),%%xmm1;"
-            // xmm1  = (a31, a21, a11, a01)
-            "movups 32(%1),%%xmm2;"
-            // xmm2  = (a32, a22, a12, a02)
-            "movups 48(%1),%%xmm3;"
-            // xmm3  = (a33, a23, a13, a03)
-
-            "movups  0(%2),%%xmm4;"
-            // xmm4  = (b30, b20, b10, b00)
-            "movups 16(%2),%%xmm5;"
-            // xmm5  = (b31, b21, b11, b01)
-            "movups 32(%2),%%xmm6;"
-            // xmm6  = (b32, b22, b12, b02)
-            "movups 48(%2),%%xmm7;"
-            // xmm7  = (b33, b23, b13, b03)
-
-            "pshufd $0x00,%%xmm4,%%xmm8;"
-            // xmm8  = (b00, b00, b00, b00)
-            "pshufd $0x55,%%xmm4,%%xmm9;"
-            // xmm9  = (b10, b10, b10, b10)
-            "pshufd $0xaa,%%xmm4,%%xmm10;"
-            // xmm10 = (b20, b20, b20, b20)
-            "pshufd $0xff,%%xmm4,%%xmm11;"
-            // xmm11 = (b30, b30, b30, b30)
-            "mulps  %%xmm0,%%xmm8;"
-            // xmm8  = (a30 * b00, a20 * b00, a10 * b00, a00 * b00)
-            "mulps  %%xmm1,%%xmm9;"
-            // xmm9  = (a31 * b10, a21 * b10, a11 * b10, a01 * b10)
-            "mulps  %%xmm2,%%xmm10;"
-            // xmm10 = (a32 * b20, a22 * b20, a12 * b20, a02 * b20)
-            "mulps  %%xmm3,%%xmm11;"
-            // xmm11 = (a33 * b30, a23 * b30, a13 * b30, a03 * b30)
-            "addps  %%xmm9,%%xmm8;"
-            "addps  %%xmm11,%%xmm10;"
-            "addps  %%xmm10,%%xmm8;"
-            // xmm8 = (a33 * b30 + a32 * b20 + a31 * b10 + a30 * b00, => c30
-            //         a23 * b30 + a22 * b20 + a21 * b10 + a20 * b00, => c20
-            //         a13 * b30 + a12 * b20 + a11 * b10 + a10 * b00, => c10
-            //         a03 * b30 + a02 * b20 + a01 * b10 + a00 * b00) => c00
-            "movups %%xmm8, 0(%0);"
-
-            "pshufd $0x00,%%xmm5,%%xmm8;"
-            // xmm8  = (b01, b01, b01, b01)
-            "pshufd $0x55,%%xmm5,%%xmm9;"
-            // xmm9  = (b11, b11, b11, b11)
-            "pshufd $0xaa,%%xmm5,%%xmm10;"
-            // xmm10 = (b21, b21, b21, b21)
-            "pshufd $0xff,%%xmm5,%%xmm11;"
-            // xmm11 = (b31, b31, b31, b31)
-            "mulps  %%xmm0,%%xmm8;"
-            "mulps  %%xmm1,%%xmm9;"
-            "mulps  %%xmm2,%%xmm10;"
-            "mulps  %%xmm3,%%xmm11;"
-            "addps  %%xmm9,%%xmm8;"
-            "addps  %%xmm11,%%xmm10;"
-            "addps  %%xmm10,%%xmm8;"
-            // xmm8 = (a33 * b31 + a32 * b21 + a31 * b11 + a30 * b01, => c31
-            //         a23 * b31 + a22 * b21 + a21 * b11 + a20 * b01, => c21
-            //         a13 * b31 + a12 * b21 + a11 * b11 + a10 * b01, => c11
-            //         a03 * b31 + a02 * b21 + a01 * b11 + a00 * b01) => c01
-            "movups %%xmm8,16(%0);"
-
-            "pshufd $0x00,%%xmm6,%%xmm8;"
-            "pshufd $0x55,%%xmm6,%%xmm9;"
-            "pshufd $0xaa,%%xmm6,%%xmm10;"
-            "pshufd $0xff,%%xmm6,%%xmm11;"
-            "mulps  %%xmm0,%%xmm8;"
-            "mulps  %%xmm1,%%xmm9;"
-            "mulps  %%xmm2,%%xmm10;"
-            "mulps  %%xmm3,%%xmm11;"
-            "addps  %%xmm9,%%xmm8;"
-            "addps  %%xmm11,%%xmm10;"
-            "addps  %%xmm10,%%xmm8;"
-            "movups %%xmm8,32(%0);"
-
-            "pshufd $0x00,%%xmm7,%%xmm8;"
-            "pshufd $0x55,%%xmm7,%%xmm9;"
-            "pshufd $0xaa,%%xmm7,%%xmm10;"
-            "pshufd $0xff,%%xmm7,%%xmm11;"
-            "mulps  %%xmm0,%%xmm8;"
-            "mulps  %%xmm1,%%xmm9;"
-            "mulps  %%xmm2,%%xmm10;"
-            "mulps  %%xmm3,%%xmm11;"
-            "addps  %%xmm9,%%xmm8;"
-            "addps  %%xmm11,%%xmm10;"
-            "addps  %%xmm10,%%xmm8;"
-            "movups %%xmm8,48(%0)"
-            :: "r"(d), "r"(s1), "r"(s2)
-            : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm10", "xmm11", "memory"
-    );
-#else
-    float tmp[sizeof(float) * 16];
-
-    if (d == s1) {
-        memcpy(tmp, s1, sizeof(tmp));
-        s1 = tmp;
-    }
-
-    d[ 0] = s1[ 0] * s2[ 0] + s1[ 4] * s2[ 1] + s1[ 8] * s2[ 2] + s1[12] * s2[ 3];
-    d[ 1] = s1[ 1] * s2[ 0] + s1[ 5] * s2[ 1] + s1[ 9] * s2[ 2] + s1[13] * s2[ 3];
-    d[ 2] = s1[ 2] * s2[ 0] + s1[ 6] * s2[ 1] + s1[10] * s2[ 2] + s1[14] * s2[ 3];
-    d[ 3] = s1[ 3] * s2[ 0] + s1[ 7] * s2[ 1] + s1[11] * s2[ 2] + s1[15] * s2[ 3];
-    d[ 4] = s1[ 0] * s2[ 4] + s1[ 4] * s2[ 5] + s1[ 8] * s2[ 6] + s1[12] * s2[ 7];
-    d[ 5] = s1[ 1] * s2[ 4] + s1[ 5] * s2[ 5] + s1[ 9] * s2[ 6] + s1[13] * s2[ 7];
-    d[ 6] = s1[ 2] * s2[ 4] + s1[ 6] * s2[ 5] + s1[10] * s2[ 6] + s1[14] * s2[ 7];
-    d[ 7] = s1[ 3] * s2[ 4] + s1[ 7] * s2[ 5] + s1[11] * s2[ 6] + s1[15] * s2[ 7];
-    d[ 8] = s1[ 0] * s2[ 8] + s1[ 4] * s2[ 9] + s1[ 8] * s2[10] + s1[12] * s2[11];
-    d[ 9] = s1[ 1] * s2[ 8] + s1[ 5] * s2[ 9] + s1[ 9] * s2[10] + s1[13] * s2[11];
-    d[10] = s1[ 2] * s2[ 8] + s1[ 6] * s2[ 9] + s1[10] * s2[10] + s1[14] * s2[11];
-    d[11] = s1[ 3] * s2[ 8] + s1[ 7] * s2[ 9] + s1[11] * s2[10] + s1[15] * s2[11];
-    d[12] = s1[ 0] * s2[12] + s1[ 4] * s2[13] + s1[ 8] * s2[14] + s1[12] * s2[15];
-    d[13] = s1[ 1] * s2[12] + s1[ 5] * s2[13] + s1[ 9] * s2[14] + s1[13] * s2[15];
-    d[14] = s1[ 2] * s2[12] + s1[ 6] * s2[13] + s1[10] * s2[14] + s1[14] * s2[15];
-    d[15] = s1[ 3] * s2[12] + s1[ 7] * s2[13] + s1[11] * s2[14] + s1[15] * s2[15];
-#endif
-}
-
-
-static void mult_mat3(float *d, const float *s1, const float *s2)
-{
-    float tmp[sizeof(float) * 9];
-
-    if (d == s1) {
-        memcpy(tmp, s1, sizeof(tmp));
-        s1 = tmp;
-    }
-
-    d[0] = s1[0] * s2[0] + s1[3] * s2[1] + s1[6] * s2[2];
-    d[1] = s1[1] * s2[0] + s1[4] * s2[1] + s1[7] * s2[2];
-    d[2] = s1[2] * s2[0] + s1[5] * s2[1] + s1[8] * s2[2];
-    d[3] = s1[0] * s2[3] + s1[3] * s2[4] + s1[6] * s2[5];
-    d[4] = s1[1] * s2[3] + s1[4] * s2[4] + s1[7] * s2[5];
-    d[5] = s1[2] * s2[3] + s1[5] * s2[4] + s1[8] * s2[5];
-    d[6] = s1[0] * s2[6] + s1[3] * s2[7] + s1[6] * s2[8];
-    d[7] = s1[1] * s2[6] + s1[4] * s2[7] + s1[7] * s2[8];
-    d[8] = s1[2] * s2[6] + s1[5] * s2[7] + s1[8] * s2[8];
-}
-
-
-static void mult_mat2(float *d, const float *s1, const float *s2)
-{
-    float tmp[sizeof(float) * 4];
-
-    if (d == s1) {
-        memcpy(tmp, s1, sizeof(tmp));
-        s1 = tmp;
-    }
-
-    d[0] = s1[0] * s2[0] + s1[2] * s2[1];
-    d[1] = s1[1] * s2[0] + s1[3] * s2[1];
-    d[2] = s1[0] * s2[2] + s1[2] * s2[3];
-    d[3] = s1[1] * s2[2] + s1[3] * s2[3];
-}
-
-
-template<> mat4 &mat4::operator*=(const mat4 &m)
-{
-    mult_mat4(d, d, m);
-    return *this;
-}
-
-
-template<> template<> mat4 mat4::operator*(const mat4 &om) const
-{
-    mat4 m;
-    mult_mat4(m, d, om);
-    return m;
-}
-
-
-template<> mat3 &mat3::operator*=(const mat3 &m)
-{
-    mult_mat3(d, d, m);
-    return *this;
-}
-
-
-template<> template<> mat3 mat3::operator*(const mat3 &om) const
-{
-    mat3 m;
-    mult_mat3(m, d, om);
-    return m;
-}
-
-
-template<> mat2 &mat2::operator*=(const mat2 &m)
-{
-    mult_mat2(d, d, m);
-    return *this;
-}
-
-
-template<> template<> mat2 mat2::operator*(const mat2 &om) const
-{
-    mat2 m;
-    mult_mat2(m, d, om);
-    return m;
-}
-
-
 template<> mat4 &mat4::translate(const vec3 &vec)
 {
-#ifdef X64_ASSEMBLY
-    __asm__ __volatile__ (
-            "pshufd $0x00,%0,%0;"
-            "pshufd $0x00,%1,%1;"
-            "pshufd $0x00,%2,%2;"
-            "movups  0(%3),%%xmm0;"
-            "movups 16(%3),%%xmm1;"
-            "movups 32(%3),%%xmm2;"
-            "movups 48(%3),%%xmm3;"
-            "mulps  %%xmm0,%0;"
-            "mulps  %%xmm1,%1;"
-            "mulps  %%xmm2,%2;"
-            "addps  %1,%0;"
-            "addps  %2,%0;"
-            "addps  %%xmm3,%0;"
-            "movups %0,48(%3)"
-            :: "x"(vec.x()), "x"(vec.y()), "x"(vec.z()), "r"(&d[0])
-            : "xmm0", "xmm1", "xmm2", "xmm3", "memory"
-    );
-#else
     d[12] += vec.x() * d[ 0] + vec.y() * d[ 4] + vec.z() * d[ 8];
     d[13] += vec.x() * d[ 1] + vec.y() * d[ 5] + vec.z() * d[ 9];
     d[14] += vec.x() * d[ 2] + vec.y() * d[ 6] + vec.z() * d[10];
     d[15] += vec.x() * d[ 3] + vec.y() * d[ 7] + vec.z() * d[11];
-#endif
 
     return *this;
 }
 
 template<> mat4 mat4::translated(const vec3 &vec) const
 {
-    return mat4(*reinterpret_cast<const vec4 *>(&d[ 0]),
-                *reinterpret_cast<const vec4 *>(&d[ 4]),
-                *reinterpret_cast<const vec4 *>(&d[ 8]),
-                *reinterpret_cast<const vec4 *>(&d[12]) +
-                *reinterpret_cast<const vec4 *>(&d[ 0]) * vec.x() +
-                *reinterpret_cast<const vec4 *>(&d[ 4]) * vec.y() +
-                *reinterpret_cast<const vec4 *>(&d[ 8]) * vec.z());
+    return mat4(vec4::from_data(&d[ 0]),
+                vec4::from_data(&d[ 4]),
+                vec4::from_data(&d[ 8]),
+                vec4::from_data(&d[12]) +
+                vec4::from_data(&d[ 0]) * vec.x() +
+                vec4::from_data(&d[ 4]) * vec.y() +
+                vec4::from_data(&d[ 8]) * vec.z());
 }
 
 template<> mat4 &mat4::rotate(float angle, const vec3 &axis)
@@ -282,7 +49,6 @@ template<> mat4 &mat4::rotate(float angle, const vec3 &axis)
     float ca = std::cos(angle);
     float omc = 1.f - ca;
 
-#ifdef X64_ASSEMBLY
     float rm[16] = {
         xr * xr * omc +      ca, xr * yr * omc + zr * sa, xr * zr * omc - yr * sa, 0.f,
         yr * xr * omc - zr * sa, yr * yr * omc +      ca, yr * zr * omc + xr * sa, 0.f,
@@ -290,41 +56,7 @@ template<> mat4 &mat4::rotate(float angle, const vec3 &axis)
                             0.f,                     0.f,                     0.f, 1.f
     };
 
-    *this *= *reinterpret_cast<mat4 *>(rm);
-#else
-    float _00 = xr * xr * omc +      ca;
-    float _01 = xr * yr * omc - zr * sa;
-    float _02 = xr * zr * omc + yr * sa;
-
-    float _10 = yr * xr * omc + zr * sa;
-    float _11 = yr * yr * omc +      ca;
-    float _12 = yr * zr * omc - xr * sa;
-
-    float _20 = zr * xr * omc - yr * sa;
-    float _21 = zr * yr * omc + xr * sa;
-    float _22 = zr * zr * omc +      ca;
-
-    float n00 = d[ 0] * _00 + d[ 4] * _10 + d[ 8] * _20;
-    float n01 = d[ 1] * _00 + d[ 5] * _10 + d[ 9] * _20;
-    float n02 = d[ 2] * _00 + d[ 6] * _10 + d[10] * _20;
-    float n03 = d[ 3] * _00 + d[ 7] * _10 + d[11] * _20;
-
-    float n04 = d[ 0] * _01 + d[ 4] * _11 + d[ 8] * _21;
-    float n05 = d[ 1] * _01 + d[ 5] * _11 + d[ 9] * _21;
-    float n06 = d[ 2] * _01 + d[ 6] * _11 + d[10] * _21;
-    float n07 = d[ 3] * _01 + d[ 7] * _11 + d[11] * _21;
-
-    float n08 = d[ 0] * _02 + d[ 4] * _12 + d[ 8] * _22;
-    float n09 = d[ 1] * _02 + d[ 5] * _12 + d[ 9] * _22;
-    float n10 = d[ 2] * _02 + d[ 6] * _12 + d[10] * _22;
-    float n11 = d[ 3] * _02 + d[ 7] * _12 + d[11] * _22;
-
-    d[ 0] = n00; d[ 1] = n01; d[ 2] = n02; d[ 3] = n03;
-    d[ 4] = n04; d[ 5] = n05; d[ 6] = n06; d[ 7] = n07;
-    d[ 8] = n08; d[ 9] = n09; d[10] = n10; d[11] = n11;
-#endif
-
-    return *this;
+    return *this *= mat4::from_data(rm);
 }
 
 template<> mat4 mat4::rotated(float angle, const vec3 &axis) const
@@ -345,7 +77,6 @@ template<> mat4 mat4::rotated(float angle, const vec3 &axis) const
     float ca = std::cos(angle);
     float omc = 1.f - ca;
 
-#ifdef X64_ASSEMBLY
     float rm[16] = {
         xr * xr * omc +      ca, xr * yr * omc + zr * sa, xr * zr * omc - yr * sa, 0.f,
         yr * xr * omc - zr * sa, yr * yr * omc +      ca, yr * zr * omc + xr * sa, 0.f,
@@ -353,77 +84,25 @@ template<> mat4 mat4::rotated(float angle, const vec3 &axis) const
                             0.f,                     0.f,                     0.f, 1.f
     };
 
-    return *this * *reinterpret_cast<mat4 *>(rm);
-#else
-    float _00 = xr * xr * omc +      ca;
-    float _01 = xr * yr * omc - zr * sa;
-    float _02 = xr * zr * omc + yr * sa;
-
-    float _10 = yr * xr * omc + zr * sa;
-    float _11 = yr * yr * omc +      ca;
-    float _12 = yr * zr * omc - xr * sa;
-
-    float _20 = zr * xr * omc - yr * sa;
-    float _21 = zr * yr * omc + xr * sa;
-    float _22 = zr * zr * omc +      ca;
-
-    float n00 = d[ 0] * _00 + d[ 4] * _10 + d[ 8] * _20;
-    float n01 = d[ 1] * _00 + d[ 5] * _10 + d[ 9] * _20;
-    float n02 = d[ 2] * _00 + d[ 6] * _10 + d[10] * _20;
-    float n03 = d[ 3] * _00 + d[ 7] * _10 + d[11] * _20;
-
-    float n04 = d[ 0] * _01 + d[ 4] * _11 + d[ 8] * _21;
-    float n05 = d[ 1] * _01 + d[ 5] * _11 + d[ 9] * _21;
-    float n06 = d[ 2] * _01 + d[ 6] * _11 + d[10] * _21;
-    float n07 = d[ 3] * _01 + d[ 7] * _11 + d[11] * _21;
-
-    float n08 = d[ 0] * _02 + d[ 4] * _12 + d[ 8] * _22;
-    float n09 = d[ 1] * _02 + d[ 5] * _12 + d[ 9] * _22;
-    float n10 = d[ 2] * _02 + d[ 6] * _12 + d[10] * _22;
-    float n11 = d[ 3] * _02 + d[ 7] * _12 + d[11] * _22;
-
-    return mat4(vec4( n00 ,  n01 ,  n02 ,  n03 ),
-                vec4( n04 ,  n05 ,  n06 ,  n07 ),
-                vec4( n08 ,  n09 ,  n10 ,  n11 ),
-                vec4(d[12], d[13], d[14], d[15]));
-#endif
+    return *this * mat4::from_data(rm);
 }
 
 template<> mat4 &mat4::scale(const vec3 &fac)
 {
-#ifdef X64_ASSEMBLY
-    __asm__ __volatile__ (
-            "pshufd $0x00,%0,%0;"
-            "pshufd $0x00,%1,%1;"
-            "pshufd $0x00,%2,%2;"
-            "movups  0(%3),%%xmm0;"
-            "movups 16(%3),%%xmm1;"
-            "movups 32(%3),%%xmm2;"
-            "mulps  %%xmm0,%0;"
-            "mulps  %%xmm1,%1;"
-            "mulps  %%xmm2,%2;"
-            "movups %0, 0(%3);"
-            "movups %1,16(%3);"
-            "movups %2,32(%3)"
-            :: "x"(fac.x()), "x"(fac.y()), "x"(fac.z()), "r"(&d[0])
-            : "xmm0", "xmm1", "xmm2", "memory"
-    );
-#else
     d[0] *= fac.x(); d[4] *= fac.y(); d[ 8] *= fac.z();
     d[1] *= fac.x(); d[5] *= fac.y(); d[ 9] *= fac.z();
     d[2] *= fac.x(); d[6] *= fac.y(); d[10] *= fac.z();
     d[3] *= fac.x(); d[7] *= fac.y(); d[11] *= fac.z();
-#endif
 
     return *this;
 }
 
 template<> mat4 mat4::scaled(const vec3 &fac) const
 {
-    return mat4(*reinterpret_cast<const vec4 *>(&d[ 0]) * fac.x(),
-                *reinterpret_cast<const vec4 *>(&d[ 4]) * fac.y(),
-                *reinterpret_cast<const vec4 *>(&d[ 8]) * fac.z(),
-                *reinterpret_cast<const vec4 *>(&d[12]));
+    return mat4(vec4::from_data(&d[ 0]) * fac.x(),
+                vec4::from_data(&d[ 4]) * fac.y(),
+                vec4::from_data(&d[ 8]) * fac.z(),
+                vec4::from_data(&d[12]));
 }
 
 
@@ -442,46 +121,6 @@ template<> float mat3::det(void)
 
 template<> mat3 &mat3::transposed_invert(void)
 {
-#ifdef X64_ASSEMBLY
-    __asm__ __volatile__ (
-            "pshufd $0x00,%1,%1;"
-            "movups  0(%0),%%xmm0;"
-            "movups 12(%0),%%xmm1;"
-            "movups 24(%0),%%xmm2;"
-
-            "pshufd $0x09,%%xmm0,%%xmm3;"
-            "pshufd $0x09,%%xmm1,%%xmm4;"
-            "pshufd $0x09,%%xmm2,%%xmm5;"
-            "pshufd $0x12,%%xmm0,%%xmm6;"
-            "pshufd $0x12,%%xmm1,%%xmm7;"
-            "pshufd $0x12,%%xmm2,%%xmm8;"
-
-            "movups %%xmm4,%%xmm9;"
-            "movups %%xmm7,%%xmm10;"
-            "mulps  %%xmm8,%%xmm9;"
-            "mulps  %%xmm5,%%xmm10;"
-
-            "mulps  %%xmm6,%%xmm5;"
-            "mulps  %%xmm3,%%xmm8;"
-
-            "mulps  %%xmm7,%%xmm3;"
-            "mulps  %%xmm4,%%xmm6;"
-
-            "subps  %%xmm10,%%xmm9;"
-            "subps  %%xmm8,%%xmm5;"
-            "subps  %%xmm6,%%xmm3;"
-
-            "mulps  %1,%%xmm9;"
-            "mulps  %1,%%xmm5;"
-            "mulps  %1,%%xmm3;"
-
-            "movups %%xmm9, 0(%0);"
-            "movups %%xmm5,12(%0);"
-            "movups %%xmm3,24(%0)"
-            :: "r"(d), "x"(1.f / det())
-            : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "memory"
-    );
-#else
     float nd[9], rcp_det = 1.f / det();
 
     nd[0] = rcp_det * (d[4] * d[8] - d[5] * d[7]);
@@ -497,71 +136,16 @@ template<> mat3 &mat3::transposed_invert(void)
     nd[8] = rcp_det * (d[0] * d[4] - d[1] * d[3]);
 
     memcpy(d, nd, sizeof(d));
-#endif
 
     return *this;
 }
 
 
-#ifndef X64_ASSEMBLY
 #define te(a, b, c) d[a] * d[b] * d[c]
 #define row(x, a1, a2, a3, a4, a5, a6, a7, a8, a9) d[x] * (te(a1, a2, a3) + te(a4, a5, a6) + te(a7, a8, a9))
-#endif
 
 template<> float mat4::det(void)
 {
-#ifdef X64_ASSEMBLY
-    float ret;
-
-    __asm__ __volatile__ (
-            "movups 16(%1),%%xmm1;"
-            "movups 32(%1),%%xmm2;"
-            "movups 48(%1),%%xmm3;"
-
-            "pshufd $0x01,%%xmm1,%%xmm4;"
-            "pshufd $0x9E,%%xmm2,%%xmm7;"
-            "pshufd $0x7B,%%xmm3,%%xmm8;"
-            "mulps  %%xmm4,%%xmm7;"
-            "mulps  %%xmm8,%%xmm7;"
-            "pshufd $0x5A,%%xmm1,%%xmm5;"
-            "pshufd $0x33,%%xmm2,%%xmm8;"
-            "pshufd $0x8D,%%xmm3,%%xmm9;"
-            "mulps  %%xmm5,%%xmm8;"
-            "mulps  %%xmm9,%%xmm8;"
-            "pshufd $0xBF,%%xmm1,%%xmm6;"
-            "pshufd $0x49,%%xmm2,%%xmm9;"
-            "pshufd $0x12,%%xmm3,%%xmm10;"
-            "mulps  %%xmm6,%%xmm9;"
-            "mulps  %%xmm10,%%xmm9;"
-            "addps  %%xmm8,%%xmm7;"
-            "addps  %%xmm9,%%xmm7;"
-
-            "pshufd $0x7B,%%xmm2,%%xmm8;"
-            "pshufd $0x9E,%%xmm3,%%xmm9;"
-            "mulps  %%xmm8,%%xmm4;"
-            "mulps  %%xmm9,%%xmm4;"
-            "pshufd $0x8D,%%xmm2,%%xmm8;"
-            "pshufd $0x33,%%xmm3,%%xmm9;"
-            "mulps  %%xmm8,%%xmm5;"
-            "mulps  %%xmm9,%%xmm5;"
-            "pshufd $0x12,%%xmm2,%%xmm8;"
-            "pshufd $0x49,%%xmm3,%%xmm9;"
-            "mulps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm9,%%xmm6;"
-            "addps  %%xmm5,%%xmm4;"
-            "addps  %%xmm6,%%xmm4;"
-
-            "subps  %%xmm4,%%xmm7;"
-            "mulps   0(%1),%%xmm7;"
-
-            "haddps %%xmm7,%%xmm7;"
-            "haddps %%xmm7,%%xmm7;"
-            "movss  %%xmm7,%0;"
-            : "=x"(ret) : "r"(d) : "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10"
-    );
-
-    return ret;
-#else
     return row( 0,   5, 10, 15,   9, 14,  7,  13,  6, 11) +
            row( 4,   1, 14, 11,   9,  2, 15,  13, 10,  3) +
            row( 8,   1,  6, 15,   5, 14,  3,  13,  2,  7) +
@@ -570,154 +154,14 @@ template<> float mat4::det(void)
            row( 4,   1, 10, 15,   9, 14,  3,  13,  2, 11) -
            row( 8,   1, 14,  7,   5,  2, 15,  13,  6,  3) -
            row(12,   1,  6, 11,   5, 10,  3,   9,  2,  7);
-#endif
 }
 
-#ifndef X64_ASSEMBLY
 #define le(a1, a2, a3, a4, a5) d[a1] * (d[a2] * d[a3] - d[a4] * d[a5])
 #define ele(x, a1, a2, a3, a4, a5, a6, a7, a8, a9, aA, aB, aC, aD, aE, aF) \
         x * (le(a1, a2, a3, a4, a5) + le(a6, a7, a8, a9, aA) + le(aB, aC, aD, aE, aF))
-#endif
 
 template<> mat4 &mat4::transposed_invert(void)
 {
-#ifdef X64_ASSEMBLY
-    __asm__ __volatile__ (
-            "pshufd $0x00,%1,%1;"
-
-            "movups  0(%0),%%xmm1;"
-            "movups 16(%0),%%xmm2;"
-            "movups 32(%0),%%xmm3;"
-            "movups 48(%0),%%xmm4;"
-
-            "pshufd $0x9E,%%xmm3,%%xmm5;"
-            "pshufd $0x7B,%%xmm4,%%xmm6;"
-            "pshufd $0x7B,%%xmm3,%%xmm7;"
-            "pshufd $0x9E,%%xmm4,%%xmm8;"
-            "pshufd $0x01,%%xmm2,%%xmm9;"
-            "mulps  %%xmm6,%%xmm5;"
-            "mulps  %%xmm8,%%xmm7;"
-            "subps  %%xmm7,%%xmm5;"
-            "mulps  %%xmm9,%%xmm5;"
-            "pshufd $0x33,%%xmm3,%%xmm6;"
-            "pshufd $0x8D,%%xmm4,%%xmm7;"
-            "pshufd $0x8D,%%xmm3,%%xmm8;"
-            "pshufd $0x33,%%xmm4,%%xmm9;"
-            "pshufd $0x5A,%%xmm2,%%xmm10;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm10,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-            "pshufd $0x49,%%xmm3,%%xmm6;"
-            "pshufd $0x12,%%xmm4,%%xmm7;"
-            "pshufd $0x12,%%xmm3,%%xmm8;"
-            "pshufd $0x49,%%xmm4,%%xmm9;"
-            "pshufd $0xBF,%%xmm2,%%xmm10;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm10,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-
-            "mulps  %1,%%xmm5;"
-            "movups %%xmm5, 0(%0);"
-
-            "pshufd $0x7B,%%xmm3,%%xmm5;"
-            "pshufd $0x9E,%%xmm4,%%xmm6;"
-            "pshufd $0x9E,%%xmm3,%%xmm7;"
-            "pshufd $0x7B,%%xmm4,%%xmm8;"
-            "pshufd $0x01,%%xmm1,%%xmm10;"
-            "mulps  %%xmm6,%%xmm5;"
-            "mulps  %%xmm8,%%xmm7;"
-            "subps  %%xmm7,%%xmm5;"
-            "mulps  %%xmm10,%%xmm5;"
-            "pshufd $0x8D,%%xmm3,%%xmm6;"
-            "pshufd $0x33,%%xmm4,%%xmm7;"
-            "pshufd $0x33,%%xmm3,%%xmm8;"
-            "pshufd $0x8D,%%xmm4,%%xmm9;"
-            "pshufd $0x5A,%%xmm1,%%xmm11;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm11,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-            "pshufd $0x12,%%xmm3,%%xmm6;"
-            "pshufd $0x49,%%xmm4,%%xmm7;"
-            "pshufd $0x49,%%xmm3,%%xmm8;"
-            "pshufd $0x12,%%xmm4,%%xmm9;"
-            "pshufd $0xBF,%%xmm1,%%xmm12;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm12,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-
-            "mulps  %1,%%xmm5;"
-            "movups %%xmm5,16(%0);"
-
-            "pshufd $0x9E,%%xmm2,%%xmm5;"
-            "pshufd $0x7B,%%xmm4,%%xmm6;"
-            "pshufd $0x7B,%%xmm2,%%xmm7;"
-            "pshufd $0x9E,%%xmm4,%%xmm8;"
-            "mulps  %%xmm6,%%xmm5;"
-            "mulps  %%xmm8,%%xmm7;"
-            "subps  %%xmm7,%%xmm5;"
-            "mulps  %%xmm10,%%xmm5;"
-            "pshufd $0x33,%%xmm2,%%xmm6;"
-            "pshufd $0x8D,%%xmm4,%%xmm7;"
-            "pshufd $0x8D,%%xmm2,%%xmm8;"
-            "pshufd $0x33,%%xmm4,%%xmm9;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm11,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-            "pshufd $0x49,%%xmm2,%%xmm6;"
-            "pshufd $0x12,%%xmm4,%%xmm7;"
-            "pshufd $0x12,%%xmm2,%%xmm8;"
-            "pshufd $0x49,%%xmm4,%%xmm9;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm12,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-
-            "mulps  %1,%%xmm5;"
-            "movups %%xmm5,32(%0);"
-
-            "pshufd $0x7B,%%xmm2,%%xmm5;"
-            "pshufd $0x9E,%%xmm3,%%xmm6;"
-            "pshufd $0x9E,%%xmm2,%%xmm7;"
-            "pshufd $0x7B,%%xmm3,%%xmm8;"
-            "mulps  %%xmm6,%%xmm5;"
-            "mulps  %%xmm8,%%xmm7;"
-            "subps  %%xmm7,%%xmm5;"
-            "mulps  %%xmm10,%%xmm5;"
-            "pshufd $0x8D,%%xmm2,%%xmm6;"
-            "pshufd $0x33,%%xmm3,%%xmm7;"
-            "pshufd $0x33,%%xmm2,%%xmm8;"
-            "pshufd $0x8D,%%xmm3,%%xmm9;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm11,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-            "pshufd $0x12,%%xmm2,%%xmm6;"
-            "pshufd $0x49,%%xmm3,%%xmm7;"
-            "pshufd $0x49,%%xmm2,%%xmm8;"
-            "pshufd $0x12,%%xmm3,%%xmm9;"
-            "mulps  %%xmm7,%%xmm6;"
-            "mulps  %%xmm9,%%xmm8;"
-            "subps  %%xmm8,%%xmm6;"
-            "mulps  %%xmm12,%%xmm6;"
-            "addps  %%xmm6,%%xmm5;"
-
-            "mulps  %1,%%xmm5;"
-            "movups %%xmm5,48(%0);"
-            :: "r"(d), "x"(1.f / det()) : "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "memory"
-    );
-#else
     float dt = 1.f / det();
 
     float nd[16] = {
@@ -740,38 +184,8 @@ template<> mat4 &mat4::transposed_invert(void)
     };
 
     memcpy(d, nd, sizeof(nd));
-#endif
 
     return *this;
-}
-
-
-template<> template<> vec4 mat4::operator*(const vec4 &v) const
-{
-    return vec4(
-        v[0] * d[0] + v[1] * d[4] + v[2] * d[ 8] + v[3] * d[12],
-        v[0] * d[1] + v[1] * d[5] + v[2] * d[ 9] + v[3] * d[13],
-        v[0] * d[2] + v[1] * d[6] + v[2] * d[10] + v[3] * d[14],
-        v[0] * d[3] + v[1] * d[7] + v[2] * d[11] + v[3] * d[15]
-    );
-}
-
-
-template<> template<> vec3 mat3::operator*(const vec3 &v) const
-{
-    return vec3(
-        v[0] * d[0] + v[1] * d[3] + v[2] * d[6],
-        v[0] * d[1] + v[1] * d[4] + v[2] * d[7],
-        v[0] * d[2] + v[1] * d[5] + v[2] * d[8]
-    );
-}
-
-template<> template<> vec2 mat2::operator*(const vec2 &v) const
-{
-    return vec2(
-        v[0] * d[0] + v[1] * d[2],
-        v[0] * d[1] + v[1] * d[3]
-    );
 }
 
 }
