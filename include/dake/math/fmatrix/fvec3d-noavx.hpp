@@ -18,6 +18,8 @@ class fvec3d {
             scalar_type d[3];
         };
 
+        scalar_type padding;
+
 
         fvec3d(double xv, double yv, double zv): vs {{xv, yv}, zv} {}
         fvec3d(double val): vs {{val, val}, val} {}
