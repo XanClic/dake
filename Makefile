@@ -4,8 +4,8 @@ MTUNE ?= -mtune=$(TARGET_ARCHITECTURE)
 
 CXX = g++
 CC = gcc
-CXXFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c++14 -Iinclude -g2 -fomit-frame-pointer -fno-math-errno -flto $(MARCH) $(MTUNE)
-CFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c11 -Iinclude -g2 -fomit-frame-pointer -fno-math-errno -flto $(MARCH) $(MTUNE)
+CXXFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c++14 -Iinclude -g2 -fomit-frame-pointer -fno-math-errno -flto $(MARCH) $(MTUNE) $(EXTRA_CXXFLAGS)
+CFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c11 -Iinclude -g2 -fomit-frame-pointer -fno-math-errno -flto $(MARCH) $(MTUNE) $(EXTRA_CFLAGS)
 AR = gcc-ar
 ARFLAGS = rcs
 
