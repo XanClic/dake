@@ -81,7 +81,7 @@ class fmat4 {
         { return fmat4(fvec4(1.f, 0.f, 0.f, 0.f),
                        fvec4(0.f, 1.f, 0.f, 0.f),
                        fvec4(0.f, 0.f, 1.f, 0.f),
-                       fvec4::direction(v)); }
+                       fvec4::position(v)); }
 
 
         fmat4 scaled(const fvec3 &v) const
