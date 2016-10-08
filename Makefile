@@ -6,11 +6,16 @@ CXX = g++
 CC = gcc
 CXXFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c++14 -Iinclude -g2 -fomit-frame-pointer -fno-math-errno -flto $(MARCH) $(MTUNE) $(EXTRA_CXXFLAGS)
 CFLAGS = -O3 -Wall -Wextra -Wshadow -pedantic -std=c11 -Iinclude -g2 -fomit-frame-pointer -fno-math-errno -flto $(MARCH) $(MTUNE) $(EXTRA_CFLAGS)
-AR = gcc-ar
+ifeq ($(CXX),g++)
+	AR = gcc-ar
+else
+	AR = ar
+endif
 ARFLAGS = rcs
 
-SOURCES = $(shell find -\( -name '*.cpp' -or -name '*.c' -\) -and -not -path './examples/*')
-OBJECTS = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SOURCES)))
+CXXSOURCES = $(shell find -name '*.cpp' -and -not -path './examples/*')
+CSOURCES = $(shell find -name '*.c' -and -not -path './examples/*')
+OBJECTS = $(patsubst %.cpp,%.o,$(CXXSOURCES)) $(patsubst %.c,%.o,$(CSOURCES))
 EXAMPLES = $(patsubst %.cpp,%,$(wildcard examples/*.cpp))
 
 LIB = libdake.a
@@ -38,8 +43,9 @@ clean:
 distclean: clean
 	$(RM) $(LIB)
 
-.hdrdeps: $(SOURCES)
-	$(CXX) $(CXXFLAGS) -MM $^ > $@
+.hdrdeps: $(CSOURCES) $(CXXSOURCES)
+	$(CXX) $(CXXFLAGS) -MM $(CXXSOURCES) > $@
+	$(CC) $(CFLAGS) -MM $(CSOURCES) > $@
 
 .hdrdeps: $(shell find -name '*.hpp' -and -not -path './include/dake/math/fmatrix/*')
 
