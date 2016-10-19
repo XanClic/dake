@@ -13,15 +13,22 @@
 #include <string>
 
 extern "C" {
+#ifndef WITHOUT_LIBPNG
 #include <png.h>
+#endif
+#ifndef WITHOUT_LIBJPEG
 #include <jpeglib.h>
+#endif
+#ifndef WITHOUT_LIBTXC
 #include <txc_dxtn.h>
+#endif
 }
 
 
 using namespace dake::helper;
 
 
+#ifndef WITHOUT_LIBPNG
 bool test_png(const void *buffer, size_t length)
 {
     return png_sig_cmp(static_cast<png_const_bytep>(buffer), 0, length < 8 ? length : 8) == 0;
@@ -128,6 +135,7 @@ void *load_png(const void *buffer, size_t length, int *width, int *height, int *
 
     return output;
 }
+#endif
 
 
 struct bitmap_file_header {
@@ -266,6 +274,7 @@ void *load_bmp(const void *buffer, size_t length, int *width, int *height, int *
 }
 
 
+#ifndef WITHOUT_LIBJPEG
 bool test_jpg(const void *buffer, size_t length)
 {
     jpeg_decompress_struct cinfo;
@@ -323,6 +332,7 @@ void *load_jpg(const void *buffer, size_t length, int *width, int *height, int *
 
     return output;
 }
+#endif
 
 
 struct image_format {
@@ -334,11 +344,13 @@ struct image_format {
 
 
 static const image_format formats[] = {
+#ifndef WITHOUT_LIBPNG
     {
         "png",
         test_png,
         load_png
     },
+#endif
 
     {
         "bmp",
@@ -346,11 +358,13 @@ static const image_format formats[] = {
         load_bmp
     },
 
+#ifndef WITHOUT_LIBJPEG
     {
         "jpg",
         test_jpg,
         load_jpg
     },
+#endif
 };
 
 
@@ -480,6 +494,7 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
             bsz = input.height() * stride;
             break;
 
+#ifndef WITHOUT_LIBTXC
         case COMPRESSED_S3TC_DXT1:
         case COMPRESSED_S3TC_DXT1_ALPHA:
         case COMPRESSED_RGTC_RED:
@@ -493,6 +508,17 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
             stride = ((input.width() + 3) / 4) * 16;
             bsz = ((input.height() + 3) / 4) * stride;
             break;
+#else
+        case COMPRESSED_S3TC_DXT1:
+        case COMPRESSED_S3TC_DXT1_ALPHA:
+        case COMPRESSED_RGTC_RED:
+        case COMPRESSED_S3TC_DXT3:
+        case COMPRESSED_S3TC_DXT5:
+        case COMPRESSED_RGTC_RG:
+            throw std::invalid_argument("This version of dake has been "
+                                        "compiled without support for "
+                                        "compressed textures");
+#endif
 
         default:
             abort();
@@ -539,6 +565,7 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
     } else if (new_format == LINEAR_UINT8) {
         throw std::invalid_argument("Decompression is not yet supported");
     } else if (input.format() == LINEAR_UINT8) {
+#ifndef WITHOUT_LIBTXC
         fmt = new_format;
         w = input.width();
         h = input.height();
@@ -602,6 +629,9 @@ dake::gl::image::image(const dake::gl::image &input, channel_format new_format, 
         } else {
             abort();
         }
+#else
+        abort();
+#endif
     } else {
         throw std::invalid_argument("Recompression is not supported");
     }
